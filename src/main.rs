@@ -9,7 +9,8 @@ fn main() {
     let os = std::env::consts::OS;
 
     if os == "linux" {
-        let path = dirs::home_dir()
-        env::set_current_dir(let + "/.mozilla/firefox")
+        let path = dirs::home_dir();
+        env::set_current_dir(path);
+        env::set_current_dir("/.mozilla/firefox");
     }
 }
