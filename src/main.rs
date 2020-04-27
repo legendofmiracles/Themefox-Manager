@@ -13,7 +13,6 @@ fn main() {
         completePath.push(temp);
         completePath.push(".mozilla/firefox");
         println!("{:?}", completePath.to_str());
-        //env::set_current_dir(path);
-        //env::set_current_dir("/.mozilla/firefox");
+        env::set_current_dir(completePath);
     }
 }
