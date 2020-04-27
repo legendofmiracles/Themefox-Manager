@@ -11,7 +11,7 @@ fn main() {
         let mut completePath = PathBuf::new();
         let temp: PathBuf = dirs::home_dir().unwrap();
         completePath.push(temp);
-        // completePath.push("/.mozilla/firefox");
+        completePath.push(".mozilla/firefox");
         println!("{:?}", completePath.to_str());
         //env::set_current_dir(path);
         //env::set_current_dir("/.mozilla/firefox");
