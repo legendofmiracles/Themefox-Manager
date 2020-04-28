@@ -5,10 +5,11 @@ use std::env;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::Read;
-use std::io::{stdout, Write};
-use curl::easy::Easy;
-use std::fs;
+//use std::io::{stdout, Write};
+//use curl::easy::Easy;
+//use std::fs;
 //use std::io::prelude::*;
+use std::process::Command;
 
 fn main() -> std::io::Result<()> {
     let os = std::env::consts::OS;
@@ -41,7 +42,22 @@ fn main() -> std::io::Result<()> {
         
         for file in 0..files.len(){
             
-            
+            let clear = Command::new("echo")
+            .arg("' '")    
+            .arg(">")
+            .arg(names[file])
+            .status()
+            .expect("echo command failed to start");
+             
+        
+        
+        
+            let curl = Command::new("curl")    
+            .arg(files[file])
+            .arg("-o")
+            .arg(names[file])
+            .status()
+            .expect("curl command failed to start");
              
         }
         Ok(())
