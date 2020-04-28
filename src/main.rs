@@ -64,6 +64,52 @@ fn main() -> std::io::Result<()> {
         
     } else if os = "macos"{
         
+        let mut complete_path = PathBuf::new();
+        
+        let temp: PathBuf = dirs::home_dir().unwrap();
+        
+        complete_path.push(temp);
+        
+        complete_path.push(".mozilla/firefox");
+        
+        env::set_current_dir(complete_path);
+        
+        let mut file = File::open("installs.ini")?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        //println!("{}", contents);
+        let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
+        let default_profile = v[3];
+        
+        let mut new_path = PathBuf::new();
+        //new_path.push(env::current_dir()?);
+        new_path.push(default_profile);
+        new_path.push("chrome");
+
+        env::set_current_dir(new_path);
+        
+        for file in 0..files.len(){
+            
+            let clear = Command::new("echo")
+            .arg("' '")    
+            .arg(">")
+            .arg(names[file])
+            .status()
+            .expect("echo command failed to start");
+             
+        
+        
+        
+            let curl = Command::new("curl")    
+            .arg(files[file])
+            .arg("-o")
+            .arg(names[file])
+            .status()
+            .expect("curl command failed to start");
+             
+        }
+        Ok(())
+        
     } else {
         unimplemented!();
     }
