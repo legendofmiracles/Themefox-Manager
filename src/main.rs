@@ -1,6 +1,6 @@
 extern crate dirs;
 use std::env;
-//use std::path::Path;
+use std::path::Path;
 //use std::ffi::OsString;
 use std::path::PathBuf;
 use std::fs::File;
@@ -16,22 +16,39 @@ fn main() -> std::io::Result<()> {
     let files = ["https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.css", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
     let names = ["userChrome.css", "userChrome.js", "userChrome.xml", "userContent.css"];
     if os == "linux" {
+        
         let mut complete_path = PathBuf::new();
         
         let temp: PathBuf = dirs::home_dir().unwrap();
         
         complete_path.push(temp);
         
-        complete_path.push(".mozilla/firefox");
+        if Path::new(complete_path.push(".mozilla/firefox")).exists() == true {
         
-        env::set_current_dir(complete_path);
+            complete_path.push(".mozilla/firefox");
+            env::set_current_dir(complete_path);
         
-        let mut file = File::open("installs.ini")?;
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)?;
-        //println!("{}", contents);
-        let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-        let default_profile = v[3];
+        } else if  Path::new(complete_path.push("snap/firefox/common/.mozilla/firefox")).exists() == true {
+            complete_path.push("snap/firefox/common/.mozilla/firefox");
+            env::set_current_dir(complete_path);
+        }
+        
+        if Path::new("installs.ini").is_file() == true {
+            let mut file = File::open("installs.ini")?;
+            let mut contents = String::new();
+            file.read_to_string(&mut contents)?;
+            //println!("{}", contents);
+            let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
+            let default_profile = v[3];
+        } else if Path::new("profiles.ini").is_file() == true{
+            let mut file = File::open("profiles.ini")?
+            let mut contents = String::new();
+            file.read_to_string(&mut contents)?;
+            //println!("{}", contents);
+            let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
+            let default_profile = v[3];
+        }
+        
         
         let mut new_path = PathBuf::new();
         //new_path.push(env::current_dir()?);
@@ -70,7 +87,7 @@ fn main() -> std::io::Result<()> {
         
         complete_path.push(temp);
         
-        complete_path.push(".mozilla/firefox");
+        complete_path.push("Library/firefox");
         
         env::set_current_dir(complete_path);
         
