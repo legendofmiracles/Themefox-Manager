@@ -51,7 +51,7 @@ fn main() -> std::io::Result<()> {
             if let Some(result) = easy {
                 fs::write(names[file], result.to_string()).expect("Unable to write file");
               } else {
-                 println!("error");
+                 println!("Error");
               }
         }
         Ok(())
