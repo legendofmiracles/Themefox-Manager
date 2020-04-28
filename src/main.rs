@@ -5,6 +5,8 @@ use std::env;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::Read;
+use std::io::{stdout, Write};
+use curl::easy::Easy;
 //use std::io::prelude::*;
 
 fn main() -> std::io::Result<()> {
@@ -27,10 +29,26 @@ fn main() -> std::io::Result<()> {
         //println!("{}", contents);
         let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
         let default_profile = v[3];
-        println!("{:?}", default_profile);
+        
+        let mut new_path = PathBuf::new();
+        //new_path.push(env::current_dir()?);
+        new_path.push(default_profile);
+        new_path.push("chrome");
+
+        env::set_current_dir(new_path);
         
         
+        for file in 0..files.len(){
+            let mut easy = Easy::new();
+            easy.url("https://www.rust-lang.org/").unwrap();
+            easy.write_function(|data| {
+                stdout().write_all(data).unwrap();
+                Ok(data.len())
+            }).unwrap();
+            easy.perform().unwrap();
         
+            let result = easy.response_code().unwrap();
+        }
         Ok(())
         
     } else {
