@@ -4,9 +4,10 @@ use std::env;
 //use std::ffi::OsString;
 use std::path::PathBuf;
 use std::fs::File;
+use std::io::Read;
 //use std::io::prelude::*;
 
-fn main() -> std::io::Result<()>{
+fn main() -> std::io::Result<()> {
     let os = std::env::consts::OS;
 
     if os == "linux" {
@@ -20,20 +21,10 @@ fn main() -> std::io::Result<()>{
         
         env::set_current_dir(completePath);
         
-        let mut file = File::open("installs.ini");
-        
+        let mut file = File::open("installs.ini")?;
         let mut contents = String::new();
-        
-        file.read_to_string(&mut contents);
-        
-        println!("{:?}", file);
+        file.read_to_string(&mut contents)?;
+        Ok(())
         
     }
 }
-
-/*
-fn openFile() -> String {
-    let f = File::open("installs.ini");
-    //Ok(())
-}
-*/
