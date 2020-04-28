@@ -62,6 +62,8 @@ fn main() -> std::io::Result<()> {
         }
         Ok(())
         
+    } else if os = "macos"{
+        
     } else {
         unimplemented!();
     }
