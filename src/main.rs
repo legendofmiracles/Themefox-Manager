@@ -48,11 +48,9 @@ fn main() -> std::io::Result<()> {
             }).unwrap();
             easy.perform().unwrap();
         
-            if let Some(result) = easy {
-                fs::write(names[file], result.to_string()).expect("Unable to write file");
-              } else {
-                 println!("Error");
-              }
+            let result = easy.perform().unwrap(); 
+            fs::write(names[file], result).expect("Unable to write file");
+             
         }
         Ok(())
         
