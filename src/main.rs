@@ -11,7 +11,8 @@ use curl::easy::Easy;
 
 fn main() -> std::io::Result<()> {
     let os = std::env::consts::OS;
-
+    let mut files = ["https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.css", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
+        
     if os == "linux" {
         let mut complete_path = PathBuf::new();
         
@@ -36,7 +37,6 @@ fn main() -> std::io::Result<()> {
         new_path.push("chrome");
 
         env::set_current_dir(new_path);
-        
         
         for file in 0..files.len(){
             let mut easy = Easy::new();
