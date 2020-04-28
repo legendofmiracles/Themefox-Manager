@@ -11,8 +11,8 @@ use curl::easy::Easy;
 
 fn main() -> std::io::Result<()> {
     let os = std::env::consts::OS;
-    let mut files = ["https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.css", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
-        
+    let files = ["https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.css", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
+    let names = ["userChrome.css", "userChrome.js", "userChrome.xml", "userContent.css"];
     if os == "linux" {
         let mut complete_path = PathBuf::new();
         
@@ -40,7 +40,7 @@ fn main() -> std::io::Result<()> {
         
         for file in 0..files.len(){
             let mut easy = Easy::new();
-            easy.url("https://www.rust-lang.org/").unwrap();
+            easy.url(files[file]).unwrap();
             easy.write_function(|data| {
                 stdout().write_all(data).unwrap();
                 Ok(data.len())
@@ -48,6 +48,8 @@ fn main() -> std::io::Result<()> {
             easy.perform().unwrap();
         
             let result = easy.response_code().unwrap();
+            let mut file = File::create(names[file])?;
+            file.write_all(result as u32)?;
         }
         Ok(())
         
