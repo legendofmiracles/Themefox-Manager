@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::{stdout, Write};
 use curl::easy::Easy;
+use std::fs;
 //use std::io::prelude::*;
 
 fn main() -> std::io::Result<()> {
@@ -48,8 +49,7 @@ fn main() -> std::io::Result<()> {
             easy.perform().unwrap();
         
             let result = easy.response_code().unwrap();
-            let mut file = File::create(names[file])?;
-            file.write_all(result as u32)?;
+            fs::write(names[file], result.to_string()).expect("Unable to write file");
         }
         Ok(())
         
