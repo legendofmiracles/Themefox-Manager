@@ -40,16 +40,8 @@ fn main() -> std::io::Result<()> {
         env::set_current_dir(new_path);
         
         for file in 0..files.len(){
-            let mut easy = Easy::new();
-            easy.url(files[file]).unwrap();
-            easy.write_function(|data| {
-                stdout().write_all(data).unwrap();
-                Ok(data.len())
-            }).unwrap();
-            easy.perform().unwrap();
-        
-            let result = easy.perform().unwrap(); 
-            fs::write(names[file], result).expect("Unable to write file");
+            
+            
              
         }
         Ok(())
