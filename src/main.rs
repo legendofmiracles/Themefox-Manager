@@ -15,14 +15,17 @@ fn main() {
         completePath.push(temp);
         completePath.push(".mozilla/firefox");
         env::set_current_dir(completePath);
-        let file = openFile();
+        let mut file = File::open("installs.ini");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents);
         println!("{:?}", file);
         
     }
 }
 
-
-fn openFile() -> std::io::Result<()> {
-    let mut f = File::open("installs.ini")?;
-    Ok(())
+/*
+fn openFile() -> String {
+    let f = File::open("installs.ini");
+    //Ok(())
 }
+*/
