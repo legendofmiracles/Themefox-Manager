@@ -1,15 +1,10 @@
 extern crate dirs;
 use std::env;
 use std::path::Path;
-//use std::ffi::OsString;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::Read;
 use std::fs;
-//use std::io::{stdout, Write};
-//use curl::easy::Easy;
-//use std::fs;
-//use std::io::prelude::*;
 use std::process::Command;
 
 fn main() -> std::io::Result<()> {
@@ -41,9 +36,6 @@ fn main() -> std::io::Result<()> {
         let native = Path::new(".mozilla/firefox").exists();
         // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
         let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
-        // not yet implemented
-        let flatpack = Path::new("TEST").exists();
-        let appimage = Path::new("TEST").exists();
         // Makes a new variable
         let mut complete_path = PathBuf::new();
         // checks If native is true, which is being set to true/false further up
