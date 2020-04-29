@@ -15,8 +15,8 @@ use std::process::Command;
 fn main() -> std::io::Result<()> {
     println!("Starting the program. \n The application will print data to the screen, if you notice that the data is incorrect, please stop the application by htting control+c.");
     let os = std::env::consts::OS;
-    let files = ["https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.css", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
-    let names = ["userChrome.css", "userChrome.js", "userChrome.xml", "userContent.css"];
+    let files = ["https://pastebin.com/raw/1LV99cKd"];//, "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
+    let names = ["userChrome.css"];//, "userChrome.js", "userChrome.xml", "userContent.css"];
     
     if os == "linux" {
         println!("You are on linux.");
@@ -60,10 +60,19 @@ fn main() -> std::io::Result<()> {
             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
             default_profile = v[3];
             let mut new_path = PathBuf::new();
-            //new_path.push(env::current_dir()?);
             new_path.push(default_profile);
-            new_path.push("chrome");
             env::set_current_dir(new_path);
+            
+            if Path::new("chrome").exists() == false {
+                fs::create_dir("chrome");
+                println!("Created the chrome directory, because it didn't exist before");
+            } else {
+                println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
+            }
+            
+            let mut chrome_path = PathBuf::new();
+            chrome_path.push("chrome");
+            env::set_current_dir(chrome_path);
 
         } else if Path::new("profiles.ini").is_file() == true{
             let default_profile;
@@ -153,7 +162,7 @@ fn main() -> std::io::Result<()> {
         Ok(())
         
     } else {
-        eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://www.github.com/alx365/firefox-manager");
+        eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("Quitting...");
     }
 }
