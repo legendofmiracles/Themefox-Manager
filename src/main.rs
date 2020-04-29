@@ -17,24 +17,30 @@ fn main() -> std::io::Result<()> {
     let names = ["userChrome.css", "userChrome.js", "userChrome.xml", "userContent.css"];
     if os == "linux" {
         
+        let native = Path::new(".mozilla/firefox").exists();
+        let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
+        let flatpack = Path::new("TEST").exists();
+        let appimage = Path::new("TEST").exists();
+        
+        
         let mut complete_path = PathBuf::new();
         
-        let temp: PathBuf = dirs::home_dir().unwrap();
+        let home_dir: PathBuf = dirs::home_dir().unwrap();
         
-        complete_path.push(temp);
+        complete_path.push(home_dir);
         
-        if Path::new(complete_path.push(".mozilla/firefox")).exists() == true {
+        if native == true {
         
             complete_path.push(".mozilla/firefox");
             env::set_current_dir(complete_path);
         
-        } else if  Path::new(complete_path.push("snap/firefox/common/.mozilla/firefox")).exists() == true {
+        } else if  snap == true {
             complete_path.push("snap/firefox/common/.mozilla/firefox");
             env::set_current_dir(complete_path);
         }
         
         
-        let mut default_profile = "null";
+        let mut default_profile;
         
         if Path::new("installs.ini").is_file() == true {
             let mut file = File::open("installs.ini")?;
@@ -127,6 +133,7 @@ fn main() -> std::io::Result<()> {
             .status()
             .expect("curl command failed to start");
              
+            println!("{}", curl)
         }
         Ok(())
         
