@@ -8,6 +8,16 @@ use std::fs;
 use std::process::Command;
 
 fn main() -> std::io::Result<()> {
+    // The ascii art message
+    let message = r#"
+   ______  __  __ __    __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __  ____  ___
+   |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _] | __| | _ \ 
+     | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | [/\ | _|  | v / 
+     |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
+    "#;
+    // prints it
+    print!("{}", message);
+    
     // Prints the starting message
     println!("Starting the program. \n The application will print data to the screen, if you notice that the data is incorrect, please stop the application by htting control+c.");
     // fetches what operating system you use

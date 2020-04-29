@@ -1,5 +1,5 @@
 [package]
-name = "App"
+name = "ThemeFox-manager"
 version = "0.1.0"
 authors = ["Insert Name Here <legendofmiracles@protonmail.com>"]
 edition = "2018"
