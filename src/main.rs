@@ -17,54 +17,69 @@ fn main() -> std::io::Result<()> {
     let names = ["userChrome.css", "userChrome.js", "userChrome.xml", "userContent.css"];
     if os == "linux" {
         
+        
+        
+        
+        let home_dir: PathBuf = dirs::home_dir().unwrap();
+        
+        env::set_current_dir(home_dir);
+        
         let native = Path::new(".mozilla/firefox").exists();
         let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
         let flatpack = Path::new("TEST").exists();
         let appimage = Path::new("TEST").exists();
-        
-        
         let mut complete_path = PathBuf::new();
         
-        let home_dir: PathBuf = dirs::home_dir().unwrap();
-        
-        complete_path.push(home_dir);
-        
         if native == true {
-        
+            println!("You have firefox installed via the native package manager");
             complete_path.push(".mozilla/firefox");
             env::set_current_dir(complete_path);
         
         } else if  snap == true {
+            println!("You have firefox installed via the snap package manager");
             complete_path.push("snap/firefox/common/.mozilla/firefox");
             env::set_current_dir(complete_path);
+        } else {
+            eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
+
         }
         
         
-        let mut default_profile;
+        
         
         if Path::new("installs.ini").is_file() == true {
+            let default_profile;
             let mut file = File::open("installs.ini")?;
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;
             //println!("{}", contents);
             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
             default_profile = v[3];
+            let mut new_path = PathBuf::new();
+            //new_path.push(env::current_dir()?);
+            new_path.push(default_profile);
+            new_path.push("chrome");
+            env::set_current_dir(new_path);
+
         } else if Path::new("profiles.ini").is_file() == true{
+            let default_profile;
             let mut file = File::open("profiles.ini")?;
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;
             //println!("{}", contents);
             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
             default_profile = v[3];
+            let mut new_path = PathBuf::new();
+            //new_path.push(env::current_dir()?);
+            new_path.push(default_profile);
+            new_path.push("chrome");
+            env::set_current_dir(new_path);
+
         }
         
         
-        let mut new_path = PathBuf::new();
-        //new_path.push(env::current_dir()?);
-        new_path.push(default_profile);
-        new_path.push("chrome");
-
-        env::set_current_dir(new_path);
+        
+       
         
         for file in 0..files.len(){
             
@@ -139,5 +154,7 @@ fn main() -> std::io::Result<()> {
         
     } else {
         unimplemented!();
+        eprintln!("Error: You seem to use a OS that is not supported. Please report this issue on github (https://www.github.com/alx365/firefox-manager");
+        panic!("Quitting...");
     }
 }
