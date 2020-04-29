@@ -5,6 +5,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::Read;
+use std::fs;
 //use std::io::{stdout, Write};
 //use curl::easy::Easy;
 //use std::fs;
@@ -23,6 +24,12 @@ fn main() -> std::io::Result<()> {
         let home_dir: PathBuf = dirs::home_dir().unwrap();
         
         env::set_current_dir(home_dir);
+
+        if Path::new(".config/firefox-theme-manager").exists() == false {
+            fs::create_dir(".config/firefox-theme-manager");
+        }
+
+
         
         let native = Path::new(".mozilla/firefox").exists();
         let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
@@ -109,7 +116,7 @@ fn main() -> std::io::Result<()> {
         
         let home_dir: PathBuf = dirs::home_dir().unwrap();
         
-        complete_path.push(temp);
+        complete_path.push(home_dir);
         
         complete_path.push("Library/Application Support/firefox");
         
@@ -140,7 +147,7 @@ fn main() -> std::io::Result<()> {
         Ok(())
         
     } else {
-        eprintln!("Error: You seem to use a OS that is not supported. Please report this issue on github (https://www.github.com/alx365/firefox-manager");
+        eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://www.github.com/alx365/firefox-manager");
         panic!("Quitting...");
     }
 }
