@@ -76,12 +76,21 @@ fn main() -> std::io::Result<()> {
             let mut new_path = PathBuf::new();
             //new_path.push(env::current_dir()?);
             new_path.push(default_profile);
-            new_path.push("chrome");
             env::set_current_dir(new_path);
+            
+            if Path::new("chrome").exists() == false {
+                fs::create_dir("chrome");
+                println!("Created the chrome directory, because it didn't exist before");
+            } else {
+                println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
+            }
+            
+            let mut chrome_path = PathBuf::new();
+            chrome_path.push("chrome");
+            env::set_current_dir(chrome_path);
 
         }
         
-        println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
         
        
         
