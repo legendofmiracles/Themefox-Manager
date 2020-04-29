@@ -26,7 +26,7 @@ fn main() -> std::io::Result<()> {
         env::set_current_dir(home_dir);
 
         if Path::new(".config/firefox-theme-manager").exists() == false {
-            fs::create_dir(".config/firefox-theme-manager");
+            fs::create_dir_all(".config/firefox-theme-manager");
         }
 
 
@@ -50,9 +50,6 @@ fn main() -> std::io::Result<()> {
             eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
 
         }
-        
-        
-        
         
         if Path::new("installs.ini").is_file() == true {
             let default_profile;
@@ -84,7 +81,7 @@ fn main() -> std::io::Result<()> {
 
         }
         
-        
+        println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
         
        
         
