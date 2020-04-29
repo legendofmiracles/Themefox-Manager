@@ -13,32 +13,44 @@ use std::fs;
 use std::process::Command;
 
 fn main() -> std::io::Result<()> {
+    // Prints the starting message
     println!("Starting the program. \n The application will print data to the screen, if you notice that the data is incorrect, please stop the application by htting control+c.");
+    // fetches what operating system you use
     let os = std::env::consts::OS;
+    // The files that the program will download
     let files = ["https://pastebin.com/raw/1LV99cKd"];//, "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
+    // The names of the files
     let names = ["userChrome.css"];//, "userChrome.js", "userChrome.xml", "userContent.css"];
-    
+    // If the operating system is linux then it does everything that is in those brackets
     if os == "linux" {
+        // It prints "you are on linux"
         println!("You are on linux.");
-        
+        // It gets your home directory
         let home_dir: PathBuf = dirs::home_dir().unwrap();
-        
+        // It changes the directory in which it is being executed to the previously set variable (in this case it is linux)
         env::set_current_dir(home_dir);
-
+        // checks if the config directory exists
         if Path::new(".config/firefox-theme-manager").exists() == false {
+            // creates the config directory if the statement above is false
             fs::create_dir_all(".config/firefox-theme-manager");
         }
 
 
-        
+        // The next part is that the program tries to understand with which package manager you have firefox installed
+        // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
         let native = Path::new(".mozilla/firefox").exists();
+        // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
         let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
+        // not yet implemented
         let flatpack = Path::new("TEST").exists();
         let appimage = Path::new("TEST").exists();
+        // Makes a new variable
         let mut complete_path = PathBuf::new();
-        
+        // checks If native is true, which is being set to true/false further up
         if native == true {
+            // Prints the message
             println!("You have firefox installed via the native package manager");
+            // We already had a very simillar piece of code. Try to understand it yourself :)
             complete_path.push(".mozilla/firefox");
             env::set_current_dir(complete_path);
         
