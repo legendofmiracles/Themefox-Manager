@@ -62,6 +62,7 @@ fn main() -> std::io::Result<()> {
          let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
          // Makes a new variable
          let mut complete_path = PathBuf::new();
+         
          // checks If native is true, which is being set to true/false further up
          if native == true {
              // Prints the message
@@ -80,56 +81,34 @@ fn main() -> std::io::Result<()> {
              // Todo
          }
  
-         //Checks that the installs.ini file exists (some versions come shipped with that and some do not its really weird) 
-         if Path::new("installs.ini").is_file() == true {
-             let default_profile;
-             let mut file = File::open("installs.ini")?;
-             let mut contents = String::new();
-             file.read_to_string(&mut contents)?;
-             //println!("{}", contents);
-             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-             default_profile = v[3];
-             let mut new_path = PathBuf::new();
-             new_path.push(default_profile);
-             env::set_current_dir(new_path);
+        let default_profile;
+        if Path::new("installs.ini").is_file() == true {
+            let mut file = File::open("installs.ini")?;
+        } else {
+            let mut file = File::open("profiles.ini")?;
+        }
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        //println!("{}", contents);
+        let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
+        
+        default_profile = v[3];
+        let mut new_path = PathBuf::new();
+        new_path.push(default_profile);
+        env::set_current_dir(new_path);
              
-             if Path::new("chrome").exists() == false {
-                 fs::create_dir("chrome");
-                 println!("Created the chrome directory, because it didn't exist before");
-             } else {
-                 println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
-             }
+        println!("This application will now attempt to delete all files in the chrome dir.");
+        
+        Ok(for entry in fs::read_dir("chrome")? {
+            let entry = entry?;
+            let path = entry.path();
+            fs::remove_file(path)
+        })
+    //}
+     
              
-             let mut chrome_path = PathBuf::new();
-             chrome_path.push("chrome");
-             env::set_current_dir(chrome_path);
- 
-         } else if Path::new("profiles.ini").is_file() == true{
-             let default_profile;
-             let mut file = File::open("profiles.ini")?;
-             let mut contents = String::new();
-             file.read_to_string(&mut contents)?;
-             //println!("{}", contents);
-             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-             println!("Warning, because for whatever reason firefox didn't generate a installs.ini file, so we will just install the theme to the last used profile.");
-             default_profile = v[3];
-             let mut new_path = PathBuf::new();
-             //new_path.push(env::current_dir()?);
-             new_path.push(default_profile);
-             env::set_current_dir(new_path);
              
-             if Path::new("chrome").exists() == false {
-                 fs::create_dir("chrome");
-                 println!("Created the chrome directory, because it didn't exist before");
-             } else {
-                 println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
-             }
-             
-             let mut chrome_path = PathBuf::new();
-             chrome_path.push("chrome");
-             env::set_current_dir(chrome_path);
- 
-         }
+    //}
     
     } else {
         // The ascii art message
