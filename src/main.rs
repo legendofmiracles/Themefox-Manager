@@ -33,20 +33,23 @@ fn main() -> std::io::Result<()> {
             env::set_current_dir(complete_path);
         }
         
+        
+        let mut default_profile = "null";
+        
         if Path::new("installs.ini").is_file() == true {
             let mut file = File::open("installs.ini")?;
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;
             //println!("{}", contents);
             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-            let default_profile = v[3];
+            default_profile = v[3];
         } else if Path::new("profiles.ini").is_file() == true{
-            let mut file = File::open("profiles.ini")?
+            let mut file = File::open("profiles.ini")?;
             let mut contents = String::new();
             file.read_to_string(&mut contents)?;
             //println!("{}", contents);
             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-            let default_profile = v[3];
+            default_profile = v[3];
         }
         
         
@@ -79,7 +82,7 @@ fn main() -> std::io::Result<()> {
         }
         Ok(())
         
-    } else if os = "macos"{
+    } else if os == "macos"{
         
         let mut complete_path = PathBuf::new();
         
