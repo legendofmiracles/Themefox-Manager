@@ -53,16 +53,17 @@ fn main() -> std::io::Result<()> {
             // We already had a very simillar piece of code. Try to understand it yourself :)
             complete_path.push(".mozilla/firefox");
             env::set_current_dir(complete_path);
-        
+        // Checks if the variable that determines if firefox was installed via snap is true
         } else if  snap == true {
             println!("You have firefox installed via the snap package manager");
             complete_path.push("snap/firefox/common/.mozilla/firefox");
             env::set_current_dir(complete_path);
         } else {
+            // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
             eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
-
         }
-        
+
+        //Checks that the installs.ini file exists (some versions come shipped with that and some do not its realy weird) 
         if Path::new("installs.ini").is_file() == true {
             let default_profile;
             let mut file = File::open("installs.ini")?;
