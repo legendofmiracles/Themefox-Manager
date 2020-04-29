@@ -96,6 +96,7 @@ fn main() -> std::io::Result<()> {
             file.read_to_string(&mut contents)?;
             //println!("{}", contents);
             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
+            println!("Warning, because for whatever reason firefox didn't generate a installs.ini file, so we will just install the theme to the last used profile.");
             default_profile = v[3];
             let mut new_path = PathBuf::new();
             //new_path.push(env::current_dir()?);
@@ -120,16 +121,7 @@ fn main() -> std::io::Result<()> {
         
         for file in 0..files.len(){
             
-            let clear = Command::new("echo")
-            .arg("' '")    
-            .arg(">")
-            .arg(names[file])
-            .status()
-            .expect("echo command failed to start");
-             
-        
-        
-        
+            
             let curl = Command::new("curl")    
             .arg(files[file])
             .arg("-o")
@@ -142,40 +134,7 @@ fn main() -> std::io::Result<()> {
         
     } else if os == "macos"{
         // not yet fully implemented, i am concentrating on linux first and then i am updating it to macos and windows respectavely
-        let mut complete_path = PathBuf::new();
-        
-        let home_dir: PathBuf = dirs::home_dir().unwrap();
-        
-        complete_path.push(home_dir);
-        
-        complete_path.push("Library/Application Support/firefox");
-        
-        env::set_current_dir(complete_path);
-        
-        
-        for file in 0..files.len(){
-            
-            let clear = Command::new("echo")
-            .arg("' '")    
-            .arg(">")
-            .arg(names[file])
-            .status()
-            .expect("echo command failed to start");
-             
-        
-        
-        
-            let curl = Command::new("curl")    
-            .arg(files[file])
-            .arg("-o")
-            .arg(names[file])
-            .status()
-            .expect("curl command failed to start");
-             
-            println!("{}", curl)
-        }
-        Ok(())
-        
+       
     } else {
         eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("Quitting...");
