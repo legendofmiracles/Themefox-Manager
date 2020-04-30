@@ -84,7 +84,21 @@ fn main() -> std::io::Result<()> {
              // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
              eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
          }
- 
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+        /*
          //Checks that the installs.ini file exists (some versions come shipped with that and some do not its really weird) 
          if Path::new("installs.ini").is_file() == true {
              let default_profile;
@@ -135,29 +149,85 @@ fn main() -> std::io::Result<()> {
              env::set_current_dir(chrome_path);
  
          }
+         */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    Ok(())
+
          
-         for file in 0..files.len(){
-             
-             
-             let curl = Command::new("curl")    
-             .arg(files[file])
-             .arg("-o")
-             .arg(names[file])
-             .status()
-             .expect("curl command failed to start");
-              
-         }
-         Ok(())
-         
-     } //else if os == "macos"{
-         // not yet fully implemented, i am concentrating on linux first and then i am updating it to macos and windows respectavely
-        
-     //} 
-     else {
-         eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
-         panic!("Quitting...");
-     }
     }
     
     
+}
+
+
+fn install_unix(){
+    for file in 0..files.len(){
+             
+             
+        let curl = Command::new("curl")    
+        .arg(files[file])
+        .arg("-o")
+        .arg(names[file])
+        .status()
+        .expect("curl command failed to start");
+         
+    } else {
+        eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+        panic!("Quitting...");
+    }
+    
+    
+    //} else if os == "macos"{
+    // not yet fully implemented, i am concentrating on linux first and then i am updating it to macos and windows respectavely
+   
+//} 
+
+}
+
+fn find_profile(){
+    let default_profile;
+    let mut contents = String::new();
+    if Path::new("installs.ini").is_file() == true { 
+    
+        let file = File::open("installs.ini";
+        file.read_to_string(&mut contents);
+    
+    } else if Path::new("profiles.ini").is_file() == true {
+    
+        let file = File::open("profiles.ini");
+        file.read_to_string(&mut contents);
+    } else {
+        println!("Error: We cannot find your last used or your default profile. \n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+    }
+    //println!("{}", contents);
+    let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
+    default_profile = v[3];
+    let mut new_path = PathBuf::new();
+    new_path.push(default_profile);
+    env::set_current_dir(new_path);
+    
+    if Path::new("chrome").exists() == false {
+        fs::create_dir("chrome");
+        println!("Created the chrome directory, because it didn't exist before");
+    } else {
+        println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
+    }
+    let mut chrome_path = PathBuf::new();
+    chrome_path.push("chrome");
+    env::set_current_dir(chrome_path);  
 }
