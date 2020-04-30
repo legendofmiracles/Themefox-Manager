@@ -86,7 +86,7 @@ fn main() /*-> std::io::Result<()>*/ {
              eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
          }
 
-         find_profile(false);
+         find_profile();
 
          for file in 0..files.len(){
              
@@ -130,7 +130,7 @@ fn main() /*-> std::io::Result<()>*/ {
             eprintln!("Error: We can not seem to find your firefox folder. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n  Would you like to specify where it is? Y/n" );
         }
 
-        find_profile(true);
+        find_profile();
 
         for file in 0..files.len(){
             
@@ -154,7 +154,7 @@ fn main() /*-> std::io::Result<()>*/ {
 
 
 
-fn find_profile(macos: bool){
+fn find_profile(){
     let default_profile;
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true { 
@@ -173,12 +173,9 @@ fn find_profile(macos: bool){
     let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
     default_profile = v[3];
     let mut new_path = PathBuf::new();
-    if macos == true {
-        new_path.push("Profiles")
-    }
     new_path.push(default_profile);
-    env::set_current_dir(new_path);
-    
+    //println!("{:?}", new_path);
+    env::set_current_dir(new_path).expect("failed to cd. \n Please report this issue on GitHub");
     if Path::new("chrome").exists() == false {
         fs::create_dir("chrome");
         println!("Created the chrome directory, because it didn't exist before");
