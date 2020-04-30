@@ -86,7 +86,7 @@ fn main() /*-> std::io::Result<()>*/ {
              eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
          }
 
-         find_profile();
+         find_profile(false);
 
          for file in 0..files.len(){
              
@@ -130,12 +130,12 @@ fn main() /*-> std::io::Result<()>*/ {
             eprintln!("Error: We can not seem to find your firefox folder. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n  Would you like to specify where it is? Y/n" );
         }
 
-        find_profile();
+        find_profile(true);
 
         for file in 0..files.len(){
             
             
-           let curl = Command::new("curl")    
+        Command::new("curl")    
            .arg(files[file])
            .arg("-o")
            .arg(names[file])
@@ -154,7 +154,7 @@ fn main() /*-> std::io::Result<()>*/ {
 
 
 
-fn find_profile(bool: macos){
+fn find_profile(macos: bool){
     let default_profile;
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true { 
