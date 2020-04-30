@@ -53,7 +53,7 @@ fn main() /*-> std::io::Result<()>*/ {
          println!("You are on linux.");
          // It gets your home directory
          let home_dir: PathBuf = dirs::home_dir().unwrap();
-         // It changes the directory in which it is being executed to the previously set variable (in this case it is linux)
+         // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
          env::set_current_dir(home_dir);
          // checks if the config directory exists
          if Path::new(".config/firefox-theme-manager").exists() == false {
@@ -98,6 +98,52 @@ fn main() /*-> std::io::Result<()>*/ {
             .status()
             .expect("curl command failed to start");
          }
+    } else if os == "macos"{
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // It prints "you are on macos"
+        println!("You are on macos.");
+        // It gets your home directory
+        let home_dir: PathBuf = dirs::home_dir().unwrap();
+        // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
+        env::set_current_dir(home_dir);
+        // checks if the config directory exists
+        // I know this isn't a common config directory on macos. But i'm lazy
+        if Path::new(".config/firefox-theme-manager").exists() == false {
+            // creates the config directory if the statement above is false
+            fs::create_dir_all(".config/firefox-theme-manager");
+        }
+
+        // The next part is that the program tries to understand with which package manager you have firefox installed
+        // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
+        let native = Path::new("Library/Application Support/Firefox/Profiles").exists();
+        // Makes a new variable
+        let mut complete_path = PathBuf::new();
+        // checks If native is true, which is being set to true/false further up
+        if native == true {
+            // We already had a very simillar piece of code. Try to understand it yourself :)
+            complete_path.push("Library/Application Support/Firefox");
+            env::set_current_dir(complete_path);
+        } else {
+            // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
+            eprintln!("Error: We can not seem to find your firefox folder. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n  Would you like to specify where it is? Y/n" );
+        }
+
+        find_profile();
+
+        for file in 0..files.len(){
+            
+            
+           let curl = Command::new("curl")    
+           .arg(files[file])
+           .arg("-o")
+           .arg(names[file])
+           .status()
+           .expect("curl command failed to start");
+        }
+
+
     } else {
         eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("Quitting...");
@@ -108,7 +154,7 @@ fn main() /*-> std::io::Result<()>*/ {
 
 
 
-fn find_profile(){
+fn find_profile(bool: macos){
     let default_profile;
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true { 
@@ -127,6 +173,9 @@ fn find_profile(){
     let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
     default_profile = v[3];
     let mut new_path = PathBuf::new();
+    if macos == true {
+        new_path.push("Profiles")
+    }
     new_path.push(default_profile);
     env::set_current_dir(new_path);
     
@@ -140,3 +189,6 @@ fn find_profile(){
     chrome_path.push("chrome");
     env::set_current_dir(chrome_path);  
 }
+
+
+
