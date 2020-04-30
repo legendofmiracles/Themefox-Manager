@@ -12,17 +12,18 @@ use clap::{App, Arg};
 
 
 
-fn main() -> std::io::Result<()> {
+fn main() /*-> std::io::Result<()>*/ {
     
     let matches = App::new("Themefox-manager")
         .version("1.0")
         .author("MY NAME <legendofmiracles@protonmail.com>")
-        .about("Does awesome things with your firefox")
+        .about("Does awesome things with your firefox. \n If no valid argument supplied it will try to install the theme from that url")
         .arg(
             Arg::with_name("reset")
                 .long("reset")
                 .help("Resets firefox theme by deleting all chrome files")
                 )
+        
         .get_matches();
 
     if matches.is_present("reset") {
@@ -31,8 +32,8 @@ fn main() -> std::io::Result<()> {
         // The ascii art message
     let message = r#"
     ______  __  __ __    __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __  ____  ___
-    |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _] | __| | _ \ 
-      | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | [/\ | _|  | v / 
+    |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
+      | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
       |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
      "#;
      // prints it
@@ -85,131 +86,39 @@ fn main() -> std::io::Result<()> {
              eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
          }
 
+         find_profile();
 
-
-
-
-
-
-
-
-
-        
-
-
-
-        /*
-         //Checks that the installs.ini file exists (some versions come shipped with that and some do not its really weird) 
-         if Path::new("installs.ini").is_file() == true {
-             let default_profile;
-             let mut file = File::open("installs.ini")?;
-             let mut contents = String::new();
-             file.read_to_string(&mut contents)?;
-             //println!("{}", contents);
-             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-             default_profile = v[3];
-             let mut new_path = PathBuf::new();
-             new_path.push(default_profile);
-             env::set_current_dir(new_path);
+         for file in 0..files.len(){
              
-             if Path::new("chrome").exists() == false {
-                 fs::create_dir("chrome");
-                 println!("Created the chrome directory, because it didn't exist before");
-             } else {
-                 println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
-             }
              
-             let mut chrome_path = PathBuf::new();
-             chrome_path.push("chrome");
-             env::set_current_dir(chrome_path);
- 
-         } else if Path::new("profiles.ini").is_file() == true{
-             let default_profile;
-             let mut file = File::open("profiles.ini")?;
-             let mut contents = String::new();
-             file.read_to_string(&mut contents)?;
-             //println!("{}", contents);
-             let v: Vec<&str> = contents.split(|c| c == '=' || c == ']' || c == '\n').collect();
-             println!("Warning, because for whatever reason firefox didn't generate a installs.ini file, so we will just install the theme to the last used profile.");
-             default_profile = v[3];
-             let mut new_path = PathBuf::new();
-             //new_path.push(env::current_dir()?);
-             new_path.push(default_profile);
-             env::set_current_dir(new_path);
-             
-             if Path::new("chrome").exists() == false {
-                 fs::create_dir("chrome");
-                 println!("Created the chrome directory, because it didn't exist before");
-             } else {
-                 println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
-             }
-             
-             let mut chrome_path = PathBuf::new();
-             chrome_path.push("chrome");
-             env::set_current_dir(chrome_path);
- 
+            let curl = Command::new("curl")    
+            .arg(files[file])
+            .arg("-o")
+            .arg(names[file])
+            .status()
+            .expect("curl command failed to start");
          }
-         */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    Ok(())
-
-         
-    }
-    
-    
-}
-
-
-fn install_unix(){
-    for file in 0..files.len(){
-             
-             
-        let curl = Command::new("curl")    
-        .arg(files[file])
-        .arg("-o")
-        .arg(names[file])
-        .status()
-        .expect("curl command failed to start");
-         
     } else {
         eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("Quitting...");
     }
     
-    
-    //} else if os == "macos"{
-    // not yet fully implemented, i am concentrating on linux first and then i am updating it to macos and windows respectavely
-   
-//} 
-
+    }
 }
+
+
 
 fn find_profile(){
     let default_profile;
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true { 
     
-        let file = File::open("installs.ini";
+        let mut file = File::open("installs.ini").expect("Unable to open");
         file.read_to_string(&mut contents);
     
     } else if Path::new("profiles.ini").is_file() == true {
     
-        let file = File::open("profiles.ini");
+        let mut file = File::open("profiles.ini").expect("Unable to open");
         file.read_to_string(&mut contents);
     } else {
         println!("Error: We cannot find your last used or your default profile. \n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
