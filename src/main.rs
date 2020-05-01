@@ -9,15 +9,13 @@ use std::fs;
 use std::process::Command;
 use clap::{App, Arg};
 
-
-
-
 fn main() /*-> std::io::Result<()>*/ {
     
     let matches = App::new("themefox-manager")
         .version("1.0")
+        .set_term_width(if let Some((Width(w), _)) = terminal_size() { w as usize } else { 120 })
         .author("MY NAME <legendofmiracles@protonmail.com>")
-        .about("Does awesome things with your firefox. \n If no valid argument supplied it will try to install the theme from that url")
+        .about("Does awesome things with your firefox. \n If no valid argument supplied it will try to install the theme from that url \n DON'T RUN THIS WITH ELEVATED PERMISSIONS")
         .arg(
             Arg::with_name("reset")
                 .long("reset")
@@ -83,7 +81,7 @@ fn main() /*-> std::io::Result<()>*/ {
              env::set_current_dir(complete_path);
          } else {
              // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
-             eprintln!("Error: We can not seem to find your firefox folder, Would you like to specify where it is? Y/n");
+             eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with sudo, please try again without. \n Would you like to specify where it is? Y/n");
          }
 
          find_profile();
@@ -125,7 +123,7 @@ fn main() /*-> std::io::Result<()>*/ {
             env::set_current_dir(complete_path);
         } else {
             // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
-            eprintln!("Error: We can not seem to find your firefox folder. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n  Would you like to specify where it is? Y/n" );
+            eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with sudo, please try again without. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n  Would you like to specify where it is? Y/n" );
         }
 
         find_profile();
