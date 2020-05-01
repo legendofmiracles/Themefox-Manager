@@ -14,7 +14,7 @@ use clap::{App, Arg};
 
 fn main() /*-> std::io::Result<()>*/ {
     
-    let matches = App::new("Themefox-manager")
+    let matches = App::new("themefox-manager")
         .version("1.0")
         .author("MY NAME <legendofmiracles@protonmail.com>")
         .about("Does awesome things with your firefox. \n If no valid argument supplied it will try to install the theme from that url")
@@ -89,8 +89,6 @@ fn main() /*-> std::io::Result<()>*/ {
          find_profile();
 
          for file in 0..files.len(){
-             
-             
             let curl = Command::new("curl")    
             .arg(files[file])
             .arg("-o")
