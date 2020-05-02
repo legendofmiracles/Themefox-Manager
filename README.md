@@ -11,4 +11,7 @@ Already implemented features:
   
     -Mac, GNU/Linux support and Windows support (exe will come out with the next release)
   
-  
+ 
+Currently it runs on curl, so make sure you have that installed.
+
+But if too many people say that sucks (hopefully not) i can also program another solution (which would mean larger executables, because a zero-dependencie solution is hard to impossible.
