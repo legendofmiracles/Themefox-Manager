@@ -9,6 +9,6 @@ Already implemented features:
   
     -Downloading and installing (currently only one firefox theme)
   
-    -Mac, GNU/Linux support and Windows support (exe will come out with the next release
+    -Mac, GNU/Linux support and Windows support (exe will come out with the next release)
   
   
