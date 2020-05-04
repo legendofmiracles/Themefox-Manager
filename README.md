@@ -10,6 +10,7 @@ Already implemented features:
     -Downloading and installing (currently only one firefox theme)
   
     -Mac, GNU/Linux support and Windows support (exe will come out with the next release)
+    -A flag for resetting the firefox themes and make firefox look normal
   
  
 Currently it runs on curl, so make sure you have that installed.
