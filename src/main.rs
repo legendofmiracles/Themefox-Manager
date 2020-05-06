@@ -1,5 +1,6 @@
 extern crate clap;
 extern crate dirs;
+//extern crate zip;
 use clap::{App, Arg};
 use std::env;
 use std::fs;
@@ -8,6 +9,8 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+use zip;
+//use zipper::Archive;
 //use std::ops::Index<usize>;
 
 fn main() /*-> std::io::Result<()>*/
@@ -99,6 +102,7 @@ fn main() /*-> std::io::Result<()>*/
             }
 
             find_profile(false);
+            fs::remove_dir_all("chrome");
         } else if os == "windows" {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +138,7 @@ fn main() /*-> std::io::Result<()>*/
             }
 
             find_profile(false);
+            fs::remove_dir_all("chrome");
         }
     } else {
         // The ascii art message
@@ -194,7 +199,7 @@ fn main() /*-> std::io::Result<()>*/
             }
 
             find_profile(true);
-
+            /*
             for file in 0..files.len() {
                 let curl = Command::new("curl")
                     .arg(files[file])
@@ -202,7 +207,9 @@ fn main() /*-> std::io::Result<()>*/
                     .arg(names[file])
                     .status()
                     .expect("curl command failed to start");
-            }
+            */
+            download("http://alx365.github.io/minimal-functional-fox.zip");
+        //}
         } else if os == "macos" {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -341,3 +348,30 @@ fn download(files: Vec<>, names: Vec<>) {
 
 }
 */
+
+fn download(file: &str) -> zip::result::ZipResult<()> {
+    Command::new("curl")
+        .arg("-L")
+        .arg(file)
+        .arg("-o")
+        .arg("zip.zip")
+        .status()
+        .expect("curl command failed to start");
+
+    let mut file = fs::File::open("zip.zip").expect("Failed to open zip");
+    let mut buf = String::new();
+    file.read_to_string(&mut buf);
+    println!("{}", buf);
+    let mut reader = std::io::Cursor::new(buf);
+
+    let mut zip = zip::ZipArchive::new(reader)?;
+    println!("{}", zip.len());
+    for i in 0..zip.len() {
+        println!("G:OAG");
+        let mut file = zip.by_index(i).unwrap();
+        println!("Filename: {}", file.name());
+        let first_byte = file.bytes().next().unwrap()?;
+        println!("{}", first_byte);
+    }
+    Ok(())
+}
