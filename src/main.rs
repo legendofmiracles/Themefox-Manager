@@ -5,12 +5,12 @@ use clap::{App, Arg};
 use std::env;
 use std::fs;
 use std::fs::File;
+use std::io;
 use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use zip;
-use std::io;
 //use zipper::Archive;
 //use std::ops::Index<usize>;
 
@@ -350,22 +350,23 @@ fn download(files: Vec<>, names: Vec<>) {
 }
 */
 
-fn download(file: &str){
+fn download(file: &str) {
     Command::new("curl")
         .arg("-L")
         .arg(file)
         .arg("-o")
-        .arg("zip.zip")
+        .arg("ChromeFiles.zip")
         .status()
         .expect("curl command failed to start");
 
-    let file = fs::File::open("zip.zip").unwrap();
+    let file = fs::File::open("ChromeFiles.zip").unwrap();
     let mut archive = zip::ZipArchive::new(file).unwrap();
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).unwrap();
-        let outpath = file.sanitized_name();
-        println!("{}", outpath.as_path().display());
+        println!("{}", file.name());
+        let toutpath: Vec<&str> = file.name().split("/").collect();
+        let outpath = PathBuf::from(toutpath[1]);
         {
             let comment = file.comment();
             if !comment.is_empty() {
@@ -374,10 +375,19 @@ fn download(file: &str){
         }
 
         if (&*file.name()).ends_with('/') {
-            println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
+            println!(
+                "File {} extracted to \"{}\"",
+                i,
+                outpath.as_path().display()
+            );
             fs::create_dir_all(&outpath).unwrap();
         } else {
-            println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
+            println!(
+                "File {} extracted to \"{}\" ({} bytes)",
+                i,
+                outpath.as_path().display(),
+                file.size()
+            );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
                     fs::create_dir_all(&p).unwrap();
@@ -386,7 +396,5 @@ fn download(file: &str){
             let mut outfile = fs::File::create(&outpath).unwrap();
             io::copy(&mut file, &mut outfile).unwrap();
         }
-
     }
-
 }
