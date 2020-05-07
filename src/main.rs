@@ -245,14 +245,7 @@ fn main() /*-> std::io::Result<()>*/
 
             find_profile(true);
 
-            for file in 0..files.len() {
-                Command::new("curl")
-                    .arg(files[file])
-                    .arg("-o")
-                    .arg(names[file])
-                    .status()
-                    .expect("curl command failed to start");
-            }
+            download("http://alx365.github.io/minimal-functional-fox.zip");
         } else if os == "windows" {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -288,14 +281,7 @@ fn main() /*-> std::io::Result<()>*/
             }
 
             find_profile(true);
-            for file in 0..files.len() {
-                Command::new("curl")
-                    .arg(files[file])
-                    .arg("-o")
-                    .arg(names[file])
-                    .status()
-                    .expect("curl command failed to start");
-            }
+            download("http://alx365.github.io/minimal-functional-fox.zip");
         } else {
             eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
             panic!("Quitting...");
@@ -364,9 +350,10 @@ fn download(file: &str) {
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).unwrap();
-        println!("{}", file.name());
-        let toutpath: Vec<&str> = file.name().split("/").collect();
-        let outpath = PathBuf::from(toutpath[1]);
+        //println!("{}", file.name());
+        //let toutpath: Vec<&str> = file.name().split("/").collect();
+        //let outpath = PathBuf::from(toutpath[1]);
+        let outpath = file.sanitized_name();
         {
             let comment = file.comment();
             if !comment.is_empty() {
