@@ -10,6 +10,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use zip;
+use std::io;
 //use zipper::Archive;
 //use std::ops::Index<usize>;
 
@@ -349,7 +350,7 @@ fn download(files: Vec<>, names: Vec<>) {
 }
 */
 
-fn download(file: &str) -> zip::result::ZipResult<()> {
+fn download(file: &str){
     Command::new("curl")
         .arg("-L")
         .arg(file)
@@ -358,20 +359,34 @@ fn download(file: &str) -> zip::result::ZipResult<()> {
         .status()
         .expect("curl command failed to start");
 
-    let mut file = fs::File::open("zip.zip").expect("Failed to open zip");
-    let mut buf = String::new();
-    file.read_to_string(&mut buf);
-    println!("{}", buf);
-    let mut reader = std::io::Cursor::new(buf);
+    let file = fs::File::open("zip.zip").unwrap();
+    let mut archive = zip::ZipArchive::new(file).unwrap();
 
-    let mut zip = zip::ZipArchive::new(reader)?;
-    println!("{}", zip.len());
-    for i in 0..zip.len() {
-        println!("G:OAG");
-        let mut file = zip.by_index(i).unwrap();
-        println!("Filename: {}", file.name());
-        let first_byte = file.bytes().next().unwrap()?;
-        println!("{}", first_byte);
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).unwrap();
+        let outpath = file.sanitized_name();
+        println!("{}", outpath.as_path().display());
+        {
+            let comment = file.comment();
+            if !comment.is_empty() {
+                println!("File {} comment: {}", i, comment);
+            }
+        }
+
+        if (&*file.name()).ends_with('/') {
+            println!("File {} extracted to \"{}\"", i, outpath.as_path().display());
+            fs::create_dir_all(&outpath).unwrap();
+        } else {
+            println!("File {} extracted to \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
+            if let Some(p) = outpath.parent() {
+                if !p.exists() {
+                    fs::create_dir_all(&p).unwrap();
+                }
+            }
+            let mut outfile = fs::File::create(&outpath).unwrap();
+            io::copy(&mut file, &mut outfile).unwrap();
+        }
+
     }
-    Ok(())
+
 }
