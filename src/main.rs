@@ -17,15 +17,21 @@ use zip;
 fn main() /*-> std::io::Result<()>*/
 {
     let matches = App::new("themefox-manager")
-        .version("1.0")
+        .version("v0.2")
         //.set_term_width(if let Some((Width(w), _)) = terminal_size() { w as usize } else { 120 })
         .author("MY NAME <legendofmiracles@protonmail.com>")
         .about("Does awesome things with your firefox. \n If no valid argument supplied it will try to install the theme from that url \n DON'T RUN THIS WITH ELEVATED PERMISSIONS")
+        .arg(
+            Arg::with_name("URL")
+            .help("Sets the URL to install from")
+            .required(true)
+            .index(1))
         .arg(
             Arg::with_name("reset")
                 .long("reset")
                 .help("Resets firefox theme by deleting all chrome files")
                 )
+            
         .get_matches();
 
     if matches.is_present("reset") {
@@ -142,6 +148,26 @@ fn main() /*-> std::io::Result<()>*/
             fs::remove_dir_all("chrome");
         }
     } else {
+        let arguments: Vec<String> = env::args().collect();
+        println!("{} arguments passed", arguments.len());
+        //let mut output = "";
+        if arguments[arguments.len() - 1].contains("http")
+            && arguments[arguments.len() - 1].contains("://")
+            && arguments[arguments.len() - 1].contains(".")
+            && arguments[arguments.len() - 1].contains("/")
+        {
+            
+            let output_exit = Command::new("curl")
+                .arg(&arguments[arguments.len() - 1])
+                .output()
+                .expect("curl command failed to start, do you have it installed?");
+            let output = output_exit.stdout;
+            println!("{:?}", output);
+        } else {
+            println!("The argument you supplied didn't seem to be a correct url.");
+            panic!("\n There is nothing to do. \n Quitting...");
+        }
+
         // The ascii art message
         let message = r#"
     ______  __  __ __    __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __  ____  ___
