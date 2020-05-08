@@ -2,6 +2,7 @@ extern crate clap;
 extern crate dirs;
 //extern crate zip;
 use clap::{App, Arg};
+use serde_json::{Result, Value};
 use std::env;
 use std::fs;
 use std::fs::File;
@@ -10,8 +11,9 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-use zip;
 use std::str;
+use zip;
+
 //use zipper::Archive;
 //use std::ops::Index<usize>;
 
@@ -154,17 +156,22 @@ fn main() /*-> std::io::Result<()>*/
         //let mut output = "";
         if arguments[arguments.len() - 1].starts_with("http")
             && arguments[arguments.len() - 1].contains("://")
-            && arguments[arguments.len() - 1].contains(".")
+            && arguments[arguments.len() - 1].contains("themefox.net")
             && arguments[arguments.len() - 1].contains("/")
         {
+            let id: Vec<&str> = arguments[arguments.len() - 1].split('/').collect();
+            println!("{:?}", id[id.len() - 2]);
 
             let output_exit = Command::new("curl")
-                .arg(&arguments[arguments.len() - 1])
+                .arg(format!("127.0.0.1:1234/get/{}", id[id.len() - 2]))
                 .output()
                 .expect("curl command failed to start, do you have it installed?");
             let output = output_exit.stdout;
             let output = str::from_utf8(&output).unwrap();
-            println!("{:?}", output);
+
+            let output_json: Value = serde_json::from_str(output)
+                .expect("the json seems to be corrupt. Please report this issue on github.");
+            println!("{:?}", output_json["category1"][0]);
         } else {
             println!("The argument you supplied didn't seem to be a correct url.");
             panic!("\n There is nothing to do. \n Quitting...");
@@ -172,7 +179,7 @@ fn main() /*-> std::io::Result<()>*/
 
         // The ascii art message
         let message = r#"
-    ______  __  __ __    __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __  ____  ___
+    ______  __  __ __    __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
     |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
       | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
       |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
