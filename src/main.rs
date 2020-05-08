@@ -2,7 +2,8 @@ extern crate clap;
 extern crate dirs;
 //extern crate zip;
 use clap::{App, Arg};
-use serde_json::{Result, Value};
+use dialoguer::{theme::ColorfulTheme, Confirm, Select};
+use serde_json::Value;
 use std::env;
 use std::fs;
 use std::fs::File;
@@ -27,7 +28,7 @@ fn main() /*-> std::io::Result<()>*/
         .arg(
             Arg::with_name("URL")
             .help("Sets the URL to install from")
-            .required(true)
+            .required(false)
             .index(1))
         .arg(
             Arg::with_name("reset")
@@ -38,6 +39,16 @@ fn main() /*-> std::io::Result<()>*/
         .get_matches();
 
     if matches.is_present("reset") {
+        if Confirm::new()
+            .with_prompt("Do you want to continue, and delete all chrome files?")
+            .interact()
+            .unwrap()
+        {
+            println!("ok, your chrome files will be deleted");
+        } else {
+            println!("Ok, looks like you changed your mind");
+            return;
+        }
         let os = std::env::consts::OS;
         println!("Deleting all chrome files so that your firefox looks normal again");
         if os == "linux" {
@@ -153,6 +164,7 @@ fn main() /*-> std::io::Result<()>*/
     } else {
         let arguments: Vec<String> = env::args().collect();
         //let mut output = "";
+        let mut downloadURL = String::new();
         if arguments[arguments.len() - 1].starts_with("http")
             && arguments[arguments.len() - 1].contains("://")
             && arguments[arguments.len() - 1].contains("themefox.net")
@@ -165,20 +177,53 @@ fn main() /*-> std::io::Result<()>*/
                 .arg(format!("127.0.0.1:1234/get/{}", id[id.len() - 2]))
                 .output()
                 .expect("curl command failed to start, do you have it installed?");
+
             let output = output_exit.stdout;
             let output = str::from_utf8(&output).unwrap();
-
+            let downloads;
             let output_json: Value = serde_json::from_str(output)
                 .expect("the json seems to be corrupt. Please report this issue on github.");
-            println!("{:?}", output_json[2]["category1"]);
+            if let Some(output_json) = output_json.as_array() {
+                downloads = output_json.len();
+            } else {
+                panic!("json again seemed to be wrong formatted... Please report this issue.");
+            }
+            println!("{}", downloads);
+            if downloads - 2 == 1 {
+                downloadURL = format!(
+                    "http://beta.themefox.net/themes/{}/{}-{}.{}",
+                    output_json[3]["theme_id"],
+                    output_json[3]["id"],
+                    output_json[3]["filename"],
+                    output_json[3]["filetype"]
+                );
+            } else if downloads - 2 > 1 {
+                let mut selections = Vec::new();
+                for i in 0..downloads - 2 {
+                    selections.push(&output_json[i + 2]["title"]);
+                }
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .with_prompt("Pick your flavor of the theme (navigate with arrow keys)")
+                    .default(0)
+                    .items(&selections[..])
+                    .interact()
+                    .unwrap();
+                downloadURL = format!(
+                    "http://beta.themefox.net/themes/{}/{}-{}.{}",
+                    output_json[selection + 2]["theme_id"],
+                    output_json[selection + 2]["id"],
+                    output_json[selection + 2]["filename"],
+                    output_json[selection + 2]["filetype"]
+                );
+            }
         } else {
-            println!("The argument you supplied didn't seem to be a correct url.");
+            println!("The argument you supplied didn't seem to be a correct url, or you didn't supply any url. \n Run with -h in order to see the usage");
             panic!("\n There is nothing to do. \n Quitting...");
         }
 
         // The ascii art message
         let message = r#"
-    ______  __  __ __    __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
+    ______  __  __  ___  __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
     |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
       | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
       |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
@@ -190,12 +235,7 @@ fn main() /*-> std::io::Result<()>*/
         println!("Starting the program. \n The application will print data to the screen, if you notice that the data is incorrect, please stop the application by htting control+c.");
         // fetches what operating system you use
         let os = std::env::consts::OS;
-        // The files that the program will download
-        let mut files = Vec::new();
-        files.push("https://pastebin.com/raw/1LV99cKd"); //, "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.js", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userChrome.xml", "https://raw.githubusercontent.com/AnubisZ9/Prismatic-Night/master/firefox/chrome/userContent.css"];
-        let mut names = Vec::new(); // The names of the files
-        names.push("userChrome.css"); //, "userChrome.js", "userChrome.xml", "userContent.css"];
-                                      // If the operating system is linux then it does everything that is in those brackets
+        // If the operating system is linux then it does everything that is in those brackets
         if os == "linux" {
             // It prints "you are on linux"
             println!("You are on linux.");
@@ -234,21 +274,9 @@ fn main() /*-> std::io::Result<()>*/
             }
 
             find_profile(true);
-            /*
-            for file in 0..files.len() {
-                let curl = Command::new("curl")
-                    .arg(files[file])
-                    .arg("-o")
-                    .arg(names[file])
-                    .status()
-                    .expect("curl command failed to start");
-            */
-            download("http://alx365.github.io/minimal-functional-fox.zip");
+            download(&downloadURL);
         //}
         } else if os == "macos" {
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // It prints "you are on macos"
             println!("You are on macos.");
             // It gets your home directory
@@ -281,9 +309,6 @@ fn main() /*-> std::io::Result<()>*/
 
             download("http://alx365.github.io/minimal-functional-fox.zip");
         } else if os == "windows" {
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // It prints "you are on macos"
             println!("You are on windows.");
             // It gets your home directory
