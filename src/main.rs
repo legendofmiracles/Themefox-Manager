@@ -275,7 +275,7 @@ fn main() /*-> std::io::Result<()>*/
 
             find_profile(true);
             download(&downloadURL);
-        //}
+        
         } else if os == "macos" {
             // It prints "you are on macos"
             println!("You are on macos.");
