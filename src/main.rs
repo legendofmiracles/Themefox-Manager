@@ -152,7 +152,6 @@ fn main() /*-> std::io::Result<()>*/
         }
     } else {
         let arguments: Vec<String> = env::args().collect();
-        println!("{} arguments passed", arguments.len());
         //let mut output = "";
         if arguments[arguments.len() - 1].starts_with("http")
             && arguments[arguments.len() - 1].contains("://")
@@ -171,7 +170,7 @@ fn main() /*-> std::io::Result<()>*/
 
             let output_json: Value = serde_json::from_str(output)
                 .expect("the json seems to be corrupt. Please report this issue on github.");
-            println!("{:?}", output_json["category1"][0]);
+            println!("{:?}", output_json[2]["category1"]);
         } else {
             println!("The argument you supplied didn't seem to be a correct url.");
             panic!("\n There is nothing to do. \n Quitting...");
