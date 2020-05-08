@@ -11,6 +11,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use zip;
+use std::str;
 //use zipper::Archive;
 //use std::ops::Index<usize>;
 
@@ -151,17 +152,18 @@ fn main() /*-> std::io::Result<()>*/
         let arguments: Vec<String> = env::args().collect();
         println!("{} arguments passed", arguments.len());
         //let mut output = "";
-        if arguments[arguments.len() - 1].contains("http")
+        if arguments[arguments.len() - 1].starts_with("http")
             && arguments[arguments.len() - 1].contains("://")
             && arguments[arguments.len() - 1].contains(".")
             && arguments[arguments.len() - 1].contains("/")
         {
-            
+
             let output_exit = Command::new("curl")
                 .arg(&arguments[arguments.len() - 1])
                 .output()
                 .expect("curl command failed to start, do you have it installed?");
             let output = output_exit.stdout;
+            let output = str::from_utf8(&output).unwrap();
             println!("{:?}", output);
         } else {
             println!("The argument you supplied didn't seem to be a correct url.");
