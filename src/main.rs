@@ -231,13 +231,13 @@ fn main() {
             // checks If native is true, which is being set to true/false further up
             if native == true {
                 // Prints the message
-                println!("You have firefox installed via the native package manager");
+                //println!("You have firefox installed via the native package manager");
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push(".mozilla/firefox");
 
             // Checks if the variable that determines if firefox was installed via snap is true
             } else if snap == true {
-                println!("You have firefox installed via the snap package manager");
+                //println!("You have firefox installed via the snap package manager");
                 complete_path.push("snap/firefox/common/.mozilla/firefox");
             } else {
                 complete_path.push(manual_profile_path());
@@ -247,8 +247,6 @@ fn main() {
             find_profile(true);
             download(&download_url);
         } else if os == "macos" {
-            // It prints "you are on macos"
-            println!("You are on macos.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
@@ -280,7 +278,7 @@ fn main() {
             download(&download_url);
         } else if os == "windows" {
             // It prints "you are on macos"
-            println!("You are on windows.");
+            //println!("You are on windows.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
