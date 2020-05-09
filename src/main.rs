@@ -404,7 +404,7 @@ fn download(file: &str) {
 }
 
 fn manual_profile_path() -> String {
-    eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n" );
+    eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open directory on the first one. Then navigate back one directory and thats the path you should enter\n" );
     if Confirm::new()
         .with_prompt("Would you now like to manually specify the chrome directory?")
         .interact()
