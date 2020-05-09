@@ -13,12 +13,9 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::str;
-use zip;
+use zip::ZipArchive;
 
-//use zipper::Archive;
-//use std::ops::Index<usize>;
-
-fn main() /*-> std::io::Result<()>*/
+fn main()
 {
     let matches = App::new("themefox-manager")
         .version("v0.2")
@@ -91,9 +88,6 @@ fn main() /*-> std::io::Result<()>*/
             find_profile(false);
             fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
         } else if os == "macos" {
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // It prints "you are on macos"
             println!("You are on macos.");
             // It gets your home directory
@@ -119,24 +113,13 @@ fn main() /*-> std::io::Result<()>*/
             find_profile(false);
             fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
         } else if os == "windows" {
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // It prints "you are on macos"
             println!("You are on windows.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
             env::set_current_dir(home_dir).expect("Error: failed to cd");
-            // checks if the config directory exists
-            // I know this isn't a common config directory on macos. But i'm lazy
-            /*
-            if Path::new(".config/firefox-theme-manager").exists() == false {
-                // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager");
-            }
-            */
-
+            
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
             let native = Path::new("AppData\\Roaming\\Mozilla\\Firefox\\Profiles").exists();
@@ -155,7 +138,7 @@ fn main() /*-> std::io::Result<()>*/
             find_profile(false);
             fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
         }
-    } else {
+    } else if matches.is_present("URL"){
         let arguments: Vec<String> = env::args().collect();
         //let mut output = "";
         let mut download_url = String::new();
@@ -256,26 +239,15 @@ fn main() /*-> std::io::Result<()>*/
                 println!("You have firefox installed via the native package manager");
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push(".mozilla/firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
+                
             // Checks if the variable that determines if firefox was installed via snap is true
             } else if snap == true {
                 println!("You have firefox installed via the snap package manager");
                 complete_path.push("snap/firefox/common/.mozilla/firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
             } else {
-                // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
-                eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n" );
-                if Confirm::new()
-                    .with_prompt("Would you now like to manually specify the chrome directory?")
-                    .interact()
-                    .unwrap()
-                {
-                    complete_path.push(manual_profile());
-                } else {
-                    println!("Ok, Bye.");
-                    panic!("Quitting...");
-                }
+                complete_path.push(manual_profile_path());
             }
+            env::set_current_dir(complete_path).expect("Error: failed to cd");
 
             find_profile(true);
             download(&download_url);
@@ -302,21 +274,11 @@ fn main() /*-> std::io::Result<()>*/
             if native == true {
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push("Library/Application Support/Firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
+                
             } else {
-                // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
-                eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n" );
-                if Confirm::new()
-                    .with_prompt("Do you want to manually specify the chrome directory?")
-                    .interact()
-                    .unwrap()
-                {
-                    //manual_profile();
-                } else {
-                    println!("Ok, Bye.");
-                    panic!("Quitting...");
-                }
+                complete_path.push(manual_profile_path());
             }
+            env::set_current_dir(complete_path).expect("Error: failed to cd");
 
             find_profile(true);
 
@@ -338,21 +300,11 @@ fn main() /*-> std::io::Result<()>*/
             if native == true {
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
+                
             } else {
-                // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
-                eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n" );
-                if Confirm::new()
-                    .with_prompt("Do you want to manually specify the chrome directory?")
-                    .interact()
-                    .unwrap()
-                {
-                    //manual_profile();
-                } else {
-                    println!("Ok, Bye.");
-                    panic!("Quitting...");
-                }
+                complete_path.push(manual_profile_path());
             }
+            env::set_current_dir(complete_path).expect("Error: failed to cd");
 
             find_profile(true);
             download(&download_url);
@@ -360,6 +312,8 @@ fn main() /*-> std::io::Result<()>*/
             eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
             panic!("Quitting...");
         }
+    } else {
+        print!("Bad usage. \n Have a look at the usage with the `-h` flag")
     }
 }
 
@@ -373,7 +327,8 @@ fn find_profile(go_chrome: bool) {
         let mut file = File::open("profiles.ini").expect("Unable to open");
         file.read_to_string(&mut contents).expect("Error: Unable to read file");
     } else {
-        println!("Error: We cannot find your last used or your default profile. \n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+        println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+        panic!("Quitting...");
     }
     //println!("{}", contents);
     let v: Vec<&str> = contents
@@ -404,11 +359,6 @@ fn find_profile(go_chrome: bool) {
     }
     env::set_current_dir(chrome_path).expect("Error: failed to cd");
 }
-/*
-fn download(files: Vec<>, names: Vec<>) {
-
-}
-*/
 
 fn download(file: &str) {
     Command::new("curl")
@@ -420,21 +370,12 @@ fn download(file: &str) {
         .expect("curl command failed to start");
 
     let file = fs::File::open("ChromeFiles.zip").unwrap();
-    let mut archive = zip::ZipArchive::new(file).unwrap();
+    let mut archive = ZipArchive::new(file).unwrap();
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).unwrap();
-        //println!("{}", file.name());
-        //let toutpath: Vec<&str> = file.name().split("/").collect();
-        //let outpath = PathBuf::from(toutpath[1]);
         let outpath = file.sanitized_name();
-        {
-            let comment = file.comment();
-            if !comment.is_empty() {
-                println!("File {} comment: {}", i, comment);
-            }
-        }
-
+        
         if (&*file.name()).ends_with('/') {
             println!(
                 "File {} extracted to \"{}\"",
@@ -457,13 +398,26 @@ fn download(file: &str) {
             let mut outfile = fs::File::create(&outpath).unwrap();
             io::copy(&mut file, &mut outfile).unwrap();
         }
+
     }
 }
 
-fn manual_profile() -> String {
-    let path: String = Input::with_theme(&ColorfulTheme::default())
+fn manual_profile_path() -> String {
+    eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n" );
+    if Confirm::new()
+        .with_prompt("Would you now like to manually specify the chrome directory?")
+        .interact()
+        .unwrap()
+    {
+        let path: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("What is the path? \n You can find it in about:profiles from firefox")
         .interact()
         .unwrap();
-    path
+        return path;
+    } else {
+        println!("Ok, Bye.");
+        panic!("Quitting...");
+    }
+    
 }
+
