@@ -363,7 +363,7 @@ fn main() /*-> std::io::Result<()>*/
     }
 }
 
-fn find_profile(goChrome: bool) {
+fn find_profile(go_chrome: bool) {
     let default_profile;
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true {
@@ -385,21 +385,21 @@ fn find_profile(goChrome: bool) {
     //println!("{:?}", new_path);
     env::set_current_dir(new_path).expect("failed to cd. \n Please report this issue on GitHub");
     if Path::new("chrome").exists() == false {
-        if goChrome == true {
+        if go_chrome == true {
             fs::create_dir("chrome").expect("Error: failed to mkdir");
             println!("Created the chrome directory, because it didn't exist before");
         } else {
             println!("You chrome directory doesn't exist, so we can't remove it -.-")
         }
     } else {
-        if goChrome == true {
+        if go_chrome == true {
             println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
         } else {
             print!("The application will now delete all files in the chrome directory");
         }
     }
     let mut chrome_path = PathBuf::new();
-    if goChrome == true {
+    if go_chrome == true {
         chrome_path.push("chrome");
     }
     env::set_current_dir(chrome_path).expect("Error: failed to cd");
