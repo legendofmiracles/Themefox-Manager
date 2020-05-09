@@ -400,6 +400,7 @@ fn download(file: &str) {
         }
 
     }
+    fs::remove_file("ChromeFiles.zip").expect("Failed to rm the Chrome zip file");
 }
 
 fn manual_profile_path() -> String {
