@@ -2,6 +2,7 @@ extern crate clap;
 extern crate dirs;
 //extern crate zip;
 use clap::{App, Arg};
+use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 use serde_json::Value;
 use std::env;
@@ -43,13 +44,11 @@ fn main() {
             println!("ok, your chrome files will be deleted");
         } else {
             println!("Ok, looks like you changed your mind");
-            panic!("Quitting...");
+            panic!("{}", "Quitting...".red());
         }
         let os = std::env::consts::OS;
         println!("Deleting all chrome files so that your firefox looks normal again");
         if os == "linux" {
-            // It prints "you are on linux"
-            println!("You are on linux.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
@@ -57,7 +56,8 @@ fn main() {
             // checks if the config directory exists
             if Path::new(".config/firefox-theme-manager").exists() == false {
                 // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager").expect("failed to mkdir");
+                fs::create_dir_all(".config/firefox-theme-manager")
+                    .expect(&format!("{}", "Error: failed to mkdir".red()));
             }
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
@@ -73,26 +73,26 @@ fn main() {
                 println!("You have firefox installed via the native package manager");
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push(".mozilla/firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
+                env::set_current_dir(complete_path)
+                    .expect(&format!("{}", "Error: failed to cd".red()));
             // Checks if the variable that determines if firefox was installed via snap is true
             } else if snap == true {
                 println!("You have firefox installed via the snap package manager");
                 complete_path.push("snap/firefox/common/.mozilla/firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
+                env::set_current_dir(complete_path)
+                    .expect(&format!("{}", "Error: failed to cd".red()));
             } else {
                 // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
                 eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n Would you like to specify where it is? Y/n");
             }
 
             find_profile(false);
-            fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
+            fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         } else if os == "macos" {
-            // It prints "you are on macos"
-            println!("You are on macos.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect("Error: failed to cd");
+            env::set_current_dir(home_dir).expect(&format!("{}", "Error: failed to cd".red()));
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
@@ -110,14 +110,12 @@ fn main() {
             }
 
             find_profile(false);
-            fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
+            fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         } else if os == "windows" {
-            // It prints "you are on macos"
-            println!("You are on windows.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect("Error: failed to cd");
+            env::set_current_dir(home_dir).expect(&format!("{}", "Error: failed to cd".red()));
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
@@ -128,14 +126,15 @@ fn main() {
             if native == true {
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
+                env::set_current_dir(complete_path)
+                    .expect(&format!("{}", "Error: failed to cd".red()));
             } else {
                 // If non of the above is true then it prints an error and asks the user to help the program (not yet fully implemented)
                 eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find it by typing about:profiles in the adress bar and then select the button open in finder on the first one. \n  Would you like to specify where it is? Y/n" );
             }
 
             find_profile(false);
-            fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
+            fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         }
     } else if matches.is_present("URL") {
         // The ascii art message
@@ -161,7 +160,7 @@ fn main() {
             let output_exit = Command::new("curl")
                 .arg(format!("127.0.0.1:1234/get/{}", id[id.len() - 2]))
                 .output()
-                .expect("curl command failed to start, do you have it installed?");
+                .expect(&format!("{}", "Error: cURL failed to spawn".red()));
 
             let output = output_exit.stdout;
             let output = str::from_utf8(&output).unwrap();
@@ -171,7 +170,10 @@ fn main() {
             if let Some(output_json) = output_json.as_array() {
                 downloads = output_json.len();
             } else {
-                panic!("json again seemed to be wrong formatted... Please report this issue.");
+                panic!(
+                    "{}",
+                    "json again seemed to be wrong formatted... Please report this issue.".red()
+                );
             }
             //println!("{}", downloads);
             if downloads - 2 == 1 {
@@ -188,7 +190,9 @@ fn main() {
                     selections.push(&output_json[i + 2]["title"]);
                 }
                 let selection = Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt("Pick your flavor of the theme (navigate with arrow keys)")
+                    .with_prompt(format!(
+                        "{}", "Pick your flavor of the theme (navigate with arrow keys)".yellow()
+                    ))
                     .default(0)
                     .items(&selections[..])
                     .interact()
@@ -203,7 +207,7 @@ fn main() {
             }
         } else {
             println!("The argument you supplied didn't seem to be a correct url, or you didn't supply any url. \n Run with -h in order to see the usage");
-            panic!("\n There is nothing to do. \n Quitting...");
+            panic!("{}", "\n There is nothing to do. \n Quitting...".red());
         }
 
         // fetches what operating system you use
@@ -218,7 +222,7 @@ fn main() {
             if Path::new(".config/firefox-theme-manager").exists() == false {
                 // creates the config directory if the statement above is false
                 fs::create_dir_all(".config/firefox-theme-manager")
-                    .expect("Error: failed to mkdir");
+                    .expect(&format!("{}", "Error: unable to cmkdird".red()));
             }
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
@@ -242,7 +246,7 @@ fn main() {
             } else {
                 complete_path.push(manual_profile_path());
             }
-            env::set_current_dir(complete_path).expect("Error: failed to cd");
+            env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
 
             find_profile(true);
             download(&download_url);
@@ -250,7 +254,7 @@ fn main() {
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect("Error: failed to cd");
+            env::set_current_dir(home_dir).expect(&format!("{}", "Error: unable to cd".red()));
             // checks if the config directory exists
             // I know this isn't a common config directory on macos. But i'm lazy
             if Path::new(".config/firefox-theme-manager").exists() == false {
@@ -271,7 +275,7 @@ fn main() {
             } else {
                 complete_path.push(manual_profile_path());
             }
-            env::set_current_dir(complete_path).expect("Error: failed to cd");
+            env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
 
             find_profile(true);
 
@@ -282,7 +286,7 @@ fn main() {
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect("Error: failed to cd");
+            env::set_current_dir(home_dir).expect(&format!("{}", "Error: unable to cd".red()));
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
@@ -296,13 +300,13 @@ fn main() {
             } else {
                 complete_path.push(manual_profile_path());
             }
-            env::set_current_dir(complete_path).expect("Error: failed to cd");
+            env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
 
             find_profile(true);
             download(&download_url);
         } else {
             eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
-            panic!("Quitting...");
+            panic!("{}", "Quitting...".red());
         }
     } else {
         print!("Bad usage. \n Have a look at the usage with the `-h` flag")
@@ -313,16 +317,18 @@ fn find_profile(go_chrome: bool) {
     let default_profile;
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true {
-        let mut file = File::open("installs.ini").expect("Unable to open");
+        let mut file = File::open("installs.ini")
+            .expect(&format!("{}", "Error: unable to open installs.ini".red()));
         file.read_to_string(&mut contents)
             .expect("Error: Unable to read file");
     } else if Path::new("profiles.ini").is_file() == true {
-        let mut file = File::open("profiles.ini").expect("Unable to open");
+        let mut file = File::open("profiles.ini")
+            .expect(&format!("{}", "Error: unable to open profiles.ini".red()));
         file.read_to_string(&mut contents)
             .expect("Error: Unable to read file");
     } else {
         println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
-        panic!("Quitting...");
+        panic!("{}", "Quitting...".red());
     }
     //println!("{}", contents);
     let v: Vec<&str> = contents
@@ -351,7 +357,10 @@ fn find_profile(go_chrome: bool) {
     if go_chrome == true {
         chrome_path.push("chrome");
     }
-    env::set_current_dir(chrome_path).expect("Error: failed to cd");
+    env::set_current_dir(chrome_path).expect(&format!(
+        "{}",
+        "Error: failed to rm the Chrome zip file".red()
+    ));
 }
 
 fn download(file: &str) {
@@ -361,7 +370,7 @@ fn download(file: &str) {
         .arg("-o")
         .arg("ChromeFiles.zip")
         .status()
-        .expect("curl command failed to start");
+        .expect(&format!("{}", "Error: cURL failed to start".red()));
 
     let file = fs::File::open("ChromeFiles.zip").unwrap();
     let mut archive = ZipArchive::new(file).unwrap();
@@ -393,23 +402,29 @@ fn download(file: &str) {
             io::copy(&mut file, &mut outfile).unwrap();
         }
     }
-    fs::remove_file("ChromeFiles.zip").expect("Failed to rm the Chrome zip file");
+    fs::remove_file("ChromeFiles.zip").expect(&format!(
+        "{}",
+        "Error: failed to rm the Chrome zip file".red()
+    ));
 }
 
 fn manual_profile_path() -> String {
     eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open directory on the first one. Then navigate back one directory and thats the path you should enter\n" );
     if Confirm::new()
-        .with_prompt("Would you now like to manually specify the chrome directory?")
+        .with_prompt(format!(
+            "{}",
+            "Would you now like to manually specify the chrome directory?".yellow()
+        ))
         .interact()
         .unwrap()
     {
         let path: String = Input::with_theme(&ColorfulTheme::default())
-            .with_prompt("What is the path? \n You can find it in about:profiles from firefox")
+            .with_prompt(format!("{}", "What is the path?".yellow()))
             .interact()
             .unwrap();
         return path;
     } else {
         println!("Ok, Bye.");
-        panic!("Quitting...");
+        panic!("{}", "Quitting...".red());
     }
 }
