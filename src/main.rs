@@ -15,8 +15,7 @@ use std::process::Command;
 use std::str;
 use zip::ZipArchive;
 
-fn main()
-{
+fn main() {
     let matches = App::new("themefox-manager")
         .version("v0.2")
         //.set_term_width(if let Some((Width(w), _)) = terminal_size() { w as usize } else { 120 })
@@ -94,7 +93,7 @@ fn main()
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
             env::set_current_dir(home_dir).expect("Error: failed to cd");
-            
+
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
             let native = Path::new("Library/Application Support/Firefox/Profiles").exists();
@@ -119,7 +118,7 @@ fn main()
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
             env::set_current_dir(home_dir).expect("Error: failed to cd");
-            
+
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
             let native = Path::new("AppData\\Roaming\\Mozilla\\Firefox\\Profiles").exists();
@@ -138,7 +137,16 @@ fn main()
             find_profile(false);
             fs::remove_dir_all("chrome").expect("Error: failed to rmdir");
         }
-    } else if matches.is_present("URL"){
+    } else if matches.is_present("URL") {
+        // The ascii art message
+        let message = r#"
+    ______  __  __  ___  __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
+    |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
+      | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
+      |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
+     "#;
+        // prints it
+        print!("{}\n", message);
         let arguments: Vec<String> = env::args().collect();
         //let mut output = "";
         let mut download_url = String::new();
@@ -148,7 +156,7 @@ fn main()
             && arguments[arguments.len() - 1].contains("/")
         {
             let id: Vec<&str> = arguments[arguments.len() - 1].split('/').collect();
-            println!("{:?}", id[id.len() - 2]);
+            //println!("{:?}", id[id.len() - 2]);
 
             let output_exit = Command::new("curl")
                 .arg(format!("127.0.0.1:1234/get/{}", id[id.len() - 2]))
@@ -165,7 +173,7 @@ fn main()
             } else {
                 panic!("json again seemed to be wrong formatted... Please report this issue.");
             }
-            println!("{}", downloads);
+            //println!("{}", downloads);
             if downloads - 2 == 1 {
                 download_url = format!(
                     "http://beta.themefox.net/themes/{}/{}-{}.{}",
@@ -198,24 +206,10 @@ fn main()
             panic!("\n There is nothing to do. \n Quitting...");
         }
 
-        // The ascii art message
-        let message = r#"
-    ______  __  __  ___  __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
-    |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
-      | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
-      |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
-     "#;
-        // prints it
-        print!("{}", message);
-
-        // Prints the starting message
-        println!("Starting the program. \n The application will print data to the screen, if you notice that the data is incorrect, please stop the application by htting control+c.");
         // fetches what operating system you use
         let os = std::env::consts::OS;
         // If the operating system is linux then it does everything that is in those brackets
         if os == "linux" {
-            // It prints "you are on linux"
-            println!("You are on linux.");
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
@@ -223,7 +217,8 @@ fn main()
             // checks if the config directory exists
             if Path::new(".config/firefox-theme-manager").exists() == false {
                 // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager").expect("Error: failed to mkdir");
+                fs::create_dir_all(".config/firefox-theme-manager")
+                    .expect("Error: failed to mkdir");
             }
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
@@ -239,7 +234,7 @@ fn main()
                 println!("You have firefox installed via the native package manager");
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push(".mozilla/firefox");
-                
+
             // Checks if the variable that determines if firefox was installed via snap is true
             } else if snap == true {
                 println!("You have firefox installed via the snap package manager");
@@ -262,7 +257,8 @@ fn main()
             // I know this isn't a common config directory on macos. But i'm lazy
             if Path::new(".config/firefox-theme-manager").exists() == false {
                 // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager").expect("Error: failed to mkdir");
+                fs::create_dir_all(".config/firefox-theme-manager")
+                    .expect("Error: failed to mkdir");
             }
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
@@ -274,7 +270,6 @@ fn main()
             if native == true {
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push("Library/Application Support/Firefox");
-                
             } else {
                 complete_path.push(manual_profile_path());
             }
@@ -300,7 +295,6 @@ fn main()
             if native == true {
                 // We already had a very simillar piece of code. Try to understand it yourself :)
                 complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
-                
             } else {
                 complete_path.push(manual_profile_path());
             }
@@ -322,10 +316,12 @@ fn find_profile(go_chrome: bool) {
     let mut contents = String::new();
     if Path::new("installs.ini").is_file() == true {
         let mut file = File::open("installs.ini").expect("Unable to open");
-        file.read_to_string(&mut contents).expect("Error: Unable to read file");
+        file.read_to_string(&mut contents)
+            .expect("Error: Unable to read file");
     } else if Path::new("profiles.ini").is_file() == true {
         let mut file = File::open("profiles.ini").expect("Unable to open");
-        file.read_to_string(&mut contents).expect("Error: Unable to read file");
+        file.read_to_string(&mut contents)
+            .expect("Error: Unable to read file");
     } else {
         println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("Quitting...");
@@ -375,7 +371,7 @@ fn download(file: &str) {
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).unwrap();
         let outpath = file.sanitized_name();
-        
+
         if (&*file.name()).ends_with('/') {
             println!(
                 "File {} extracted to \"{}\"",
@@ -398,7 +394,6 @@ fn download(file: &str) {
             let mut outfile = fs::File::create(&outpath).unwrap();
             io::copy(&mut file, &mut outfile).unwrap();
         }
-
     }
     fs::remove_file("ChromeFiles.zip").expect("Failed to rm the Chrome zip file");
 }
@@ -411,14 +406,12 @@ fn manual_profile_path() -> String {
         .unwrap()
     {
         let path: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("What is the path? \n You can find it in about:profiles from firefox")
-        .interact()
-        .unwrap();
+            .with_prompt("What is the path? \n You can find it in about:profiles from firefox")
+            .interact()
+            .unwrap();
         return path;
     } else {
         println!("Ok, Bye.");
         panic!("Quitting...");
     }
-    
 }
-
