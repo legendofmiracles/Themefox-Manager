@@ -148,6 +148,7 @@ fn main() {
         print!("{}\n", message);
         let arguments: Vec<String> = env::args().collect();
         //let mut output = "";
+        println!("{}", arguments[1]);
         let mut download_url = String::new();
         if arguments[arguments.len() - 1].starts_with("http")
             && arguments[arguments.len() - 1].contains("://")
@@ -191,7 +192,8 @@ fn main() {
                 }
                 let selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt(format!(
-                        "{}", "Pick your flavor of the theme (navigate with arrow keys)".yellow()
+                        "{}",
+                        "Pick your flavor of the theme (navigate with arrow keys)".yellow()
                     ))
                     .default(0)
                     .items(&selections[..])
@@ -311,6 +313,16 @@ fn main() {
     } else {
         print!("Bad usage. \n Have a look at the usage with the `-h` flag")
     }
+
+    if Confirm::new()
+        .with_prompt(format!("{}", "Choose any, to exit.".yellow()))
+        .interact()
+        .unwrap()
+    {
+        panic!("{}", "Quitting...".red());
+    } else {
+        panic!("{}", "Quitting...".red());
+    }
 }
 
 fn find_profile(go_chrome: bool) {
@@ -335,6 +347,10 @@ fn find_profile(go_chrome: bool) {
         .split(|c| c == '=' || c == ']' || c == '\n')
         .collect();
     default_profile = v[3];
+    if !default_profile.contains(".") {
+        println!("{}", "You seem to be using a very old firefox version. Consider updating. \n We do not support such old versions".red());
+        panic!("");
+    }
     let mut new_path = PathBuf::new();
     new_path.push(default_profile);
     //println!("{:?}", new_path);
@@ -353,14 +369,15 @@ fn find_profile(go_chrome: bool) {
             print!("The application will now delete all files in the chrome directory");
         }
     }
-    let mut chrome_path = PathBuf::new();
     if go_chrome == true {
+        let mut chrome_path = PathBuf::new();
         chrome_path.push("chrome");
+        env::set_current_dir(chrome_path).expect(&format!(
+            "{}",
+            "Error: failed to cd into the Chrome dir".red()
+        ));
     }
-    env::set_current_dir(chrome_path).expect(&format!(
-        "{}",
-        "Error: failed to rm the Chrome zip file".red()
-    ));
+    
 }
 
 fn download(file: &str) {
