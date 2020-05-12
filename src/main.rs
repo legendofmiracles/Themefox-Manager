@@ -32,7 +32,6 @@ fn main() {
                 .long("reset")
                 .help("Resets firefox theme by deleting all chrome files")
                 )
-            
         .get_matches();
 
     if matches.is_present("reset") {
@@ -148,14 +147,17 @@ fn main() {
         print!("{}\n", message);
         let arguments: Vec<String> = env::args().collect();
         //let mut output = "";
-        println!("{}", arguments[1]);
+        let the_argument: Vec<&str>;
+        the_argument = arguments[arguments.len() - 1].split(' ').collect();
+
+        println!("{}", the_argument[1]);
         let mut download_url = String::new();
-        if arguments[arguments.len() - 1].starts_with("http")
-            && arguments[arguments.len() - 1].contains("://")
-            && arguments[arguments.len() - 1].contains("themefox.net")
-            && arguments[arguments.len() - 1].contains("/")
+        if the_argument[1].starts_with("http")
+            && the_argument[1].contains("://")
+            && the_argument[1].contains("themefox.net")
+            && the_argument[1].contains("/")
         {
-            let id: Vec<&str> = arguments[arguments.len() - 1].split('/').collect();
+            let id: Vec<&str> = the_argument[1].split('/').collect();
             //println!("{:?}", id[id.len() - 2]);
 
             let output_exit = Command::new("curl")
@@ -377,7 +379,6 @@ fn find_profile(go_chrome: bool) {
             "Error: failed to cd into the Chrome dir".red()
         ));
     }
-    
 }
 
 fn download(file: &str) {
