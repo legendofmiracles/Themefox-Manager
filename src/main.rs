@@ -315,11 +315,16 @@ fn main() {
         }
     } else {
         let os = std::env::consts::OS;
-        let mut path = dirs::config_dir().unwrap();
-        path.push("/themefox-manager.txt");
+        let mut path: PathBuf = PathBuf::new();
+        path.push("/usr/share/themefox");
+        fs::create_dir_all(&path).expect(&format!(
+            "{}",
+            "Failed to make config dir in /usr/share".red()
+        ));
+        path.push("themefox-manager.txt");
 
         if !path.exists() {
-            print!("Performing first time setup and installing, configuring stuff, so that this application will work.");
+            println!("Performing first time setup and installing, configuring stuff, so that this application will work.");
             let _file =
                 File::create(path).expect(&format!("{}", "Failed to make config directory".red()));
             //file.write_all(b"DO NOT DELETE THIS FILE, IF YOU SHOULD DELETE IS, IT WILL ON THE NEXT STARTUP, WITHOUT ANY ARGUMENTS, TRY TO INSTALL THE CUSTOM PROTOCOL HANDLERS").expect(&format!("{}", "Error: Failed to write to config file".red()))
@@ -329,16 +334,38 @@ fn main() {
                     "Error: failed to create file in /usr/bin. Got r00t?".red()
                 ));
                 fs::copy(std::env::current_exe().unwrap(), "/usr/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\nDo i have the permissions for this executable?".red()));
-                
+
                 /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
                     "{}",
                     "Error: An error occured when deleteing this executable.".red()
                 ));*/
-                let output_exit = Command::new("curl")
-                .arg()
-                .output()
-                .expect(&format!("{}", "Error: cURL failed to spawn".red()));
-                let output = output_exit.stdout;
+                env::set_current_dir("/usr/share/applications")
+                    .expect(&format!("{}", "Error: Failed to cd into a root dir".red()));
+                Command::new("sudo")
+                .arg("curl")
+                .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.desktop")
+                .arg("-o")
+                .arg("/usr/share/applications/themefox-manager.desktop")
+                .status()
+                .expect(&format!("{}", "Error: sudo and/or xdg-mime failed to spawn".red()));
+
+                Command::new("xdg-mime")
+                    .arg("default")
+                    .arg("/usr/share/applications/themefox-manager.desktop")
+                    .arg("x-scheme-handler/themefox-manager")
+                    .status()
+                    .expect(&format!(
+                        "{}",
+                        "Error: sudo and/or xdg-mime failed to spawn".red()
+                    ));
+
+                Command::new("update-desktop-database")
+                    .status()
+                    .expect(&format!(
+                        "{}",
+                        "Error: update-desktop-database failed to spawn".red()
+                    ));
+                println!("{}", "Finished installing. Enjoy!");
             } else if os == "windows" {
                 File::create("C:\\Program Files\\themefox\\themefox-manager.exe").expect(&format!(
                     "{}",
