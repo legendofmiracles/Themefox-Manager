@@ -20,6 +20,6 @@ Currently it runs on curl, so make sure you have that installed.
 But if too many people say that sucks (hopefully not) i can also program another solution (which would mean larger executables, because a zero-dependencie solution is hard to impossible.
 
 
-Contributin:
+Contributing:
   I am open to contributions. Please feel free to creaete a pull request and somewhat describe what you changed. 
   Thanks!
