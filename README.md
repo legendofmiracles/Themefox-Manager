@@ -9,7 +9,7 @@ Coming features:
 
 Already implemented features:
   
-    -Downloading and installing (currently only one firefox theme)
+    -Downloading and installing (would work if the website would be up)
   
     -Mac, GNU/Linux support and Windows support (exe will come out with the next release)
     -A flag for resetting the firefox themes and make firefox look normal
@@ -18,3 +18,8 @@ Already implemented features:
 Currently it runs on curl, so make sure you have that installed.
 
 But if too many people say that sucks (hopefully not) i can also program another solution (which would mean larger executables, because a zero-dependencie solution is hard to impossible.
+
+
+Contributin:
+  I am open to contributions. Please feel free to creaete a pull request and somewhat describe what you changed. 
+  Thanks!
