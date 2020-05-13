@@ -15,6 +15,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::str;
 use zip::ZipArchive;
+//use std::io::Write;
 
 fn main() {
     let matches = App::new("themefox-manager")
@@ -313,9 +314,48 @@ fn main() {
             panic!("{}", "Quitting...".red());
         }
     } else {
-        print!("Bad usage. \n Have a look at the usage with the `-h` flag")
-    }
+        let os = std::env::consts::OS;
+        let mut path = dirs::config_dir().unwrap();
+        path.push("/themefox-manager.txt");
 
+        if !path.exists() {
+            print!("Performing first time setup and installing, configuring stuff, so that this application will work.");
+            let _file =
+                File::create(path).expect(&format!("{}", "Failed to make config directory".red()));
+            //file.write_all(b"DO NOT DELETE THIS FILE, IF YOU SHOULD DELETE IS, IT WILL ON THE NEXT STARTUP, WITHOUT ANY ARGUMENTS, TRY TO INSTALL THE CUSTOM PROTOCOL HANDLERS").expect(&format!("{}", "Error: Failed to write to config file".red()))
+            if os == "linux" {
+                File::create("/usr/bin/themefox-manager").expect(&format!(
+                    "{}",
+                    "Error: failed to create file in /usr/bin. Got r00t?".red()
+                ));
+                fs::copy(std::env::current_exe().unwrap(), "/usr/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\nDo i have the permissions for this executable?".red()));
+                
+                /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
+                    "{}",
+                    "Error: An error occured when deleteing this executable.".red()
+                ));*/
+                let output_exit = Command::new("curl")
+                .arg()
+                .output()
+                .expect(&format!("{}", "Error: cURL failed to spawn".red()));
+                let output = output_exit.stdout;
+            } else if os == "windows" {
+                File::create("C:\\Program Files\\themefox\\themefox-manager.exe").expect(&format!(
+                    "{}",
+                    "Error: failed to create file in C:\\Program Files\\themefox\\themefox-manager.exe. Did you run this with elevate permissions?".red()
+                ));
+                fs::copy(std::env::current_exe().unwrap(), "C:\\Program Files\\themefox\\themefox-manager.exe").expect(&format!("{}", "Failed to copy executable content to the executable in the C:\\Program Files\\themefox\\themefox-manager.exe directory.\nDo i have the permissions for this executable?".red()));
+                /*
+                fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
+                    "{}",
+                    "Error: An error occured when deleteing this executable.".red()
+                ));
+                */
+            }
+        } else {
+            print!("Bad usage. \n Have a look at the usage with the `-h` flag");
+        }
+    }
     if Confirm::new()
         .with_prompt(format!("{}", "Choose any, to exit.".yellow()))
         .interact()

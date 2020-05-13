@@ -1,0 +1,13 @@
+[Desktop Entry]
+
+Name=themefox-manager
+
+Comment=A userchrome css manager for firefox with good support for the themefox website
+
+Exec=/usr/bin/themefox-manager %U
+
+Terminal=true
+
+Type=Application
+
+MimeType=x-scheme-handler/themefox-manager;
