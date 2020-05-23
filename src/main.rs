@@ -291,7 +291,7 @@ fn main() {
                 complete_path.push(manual_profile_path());
             }
             env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
-
+            succes("Got your firefox directory");
             find_profile(true);
 
             download(&download_url);
@@ -316,7 +316,7 @@ fn main() {
                 complete_path.push(manual_profile_path());
             }
             env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
-
+            succes("Got your firefox directory");
             find_profile(true);
             download(&download_url);
         } else {
