@@ -1,5 +1,5 @@
 # Themefox-Manager
-This is my first project in rust, so please excuse the terrible code quality.
+This is my first project in rust, so please excuse the terrible code quality and broken logic.
 
 A super minimal and fast theme manager for Firefox written in 100% rust(Not yet finished)
 
