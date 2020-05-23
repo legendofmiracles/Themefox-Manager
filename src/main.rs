@@ -34,7 +34,7 @@ fn main() {
                 .help("Resets firefox theme by deleting all chrome files")
                 )
         .get_matches();
-    
+
     if matches.is_present("reset") {
         if Confirm::new()
             .with_prompt("Do you want to continue, and delete all chrome files?")
@@ -148,8 +148,13 @@ fn main() {
         print!("{}\n", message);
         let arguments: Vec<String> = env::args().collect();
         //let mut output = "";
-        let the_argument: Vec<&str>;
-        the_argument = arguments[arguments.len() - 1].split(' ').collect();
+        let mut the_argument: Vec<&str> = Vec::new();
+        if arguments[arguments.len() - 1].starts_with("themefox-manager://") {
+            the_argument = arguments[arguments.len() - 1].split(' ').collect();
+        } else {
+            the_argument.push("nothing");
+            the_argument.push(&arguments[arguments.len() - 1]);
+        }
 
         println!("{}", the_argument[1]);
         let mut download_url = String::new();
@@ -158,6 +163,7 @@ fn main() {
             && the_argument[1].contains("themefox.net")
             && the_argument[1].contains("/")
         {
+            succes("Good url");
             let id: Vec<&str> = the_argument[1].split('/').collect();
             //println!("{:?}", id[id.len() - 2]);
 
@@ -179,6 +185,7 @@ fn main() {
                     "json again seemed to be wrong formatted... Please report this issue.".red()
                 );
             }
+            succes("Good response from the server");
             //println!("{}", downloads);
             if downloads - 2 == 1 {
                 download_url = format!(
@@ -217,6 +224,7 @@ fn main() {
 
         // fetches what operating system you use
         let os = std::env::consts::OS;
+        succes("Fetched your operating system");
         // If the operating system is linux then it does everything that is in those brackets
         if os == "linux" {
             // It gets your home directory
@@ -251,9 +259,11 @@ fn main() {
             } else {
                 complete_path.push(manual_profile_path());
             }
+            succes("Got your firefox directory");
             env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
 
             find_profile(true);
+
             download(&download_url);
         } else if os == "macos" {
             // It gets your home directory
@@ -329,15 +339,6 @@ fn main() {
             print!("Bad usage. \n Have a look at the usage with the `-h` flag");
         }
     }
-    if Confirm::new()
-        .with_prompt(format!("{}", "Choose any, to exit.".yellow()))
-        .interact()
-        .unwrap()
-    {
-        panic!("{}", "Quitting...".red());
-    } else {
-        panic!("{}", "Quitting...".red());
-    }
 }
 
 fn find_profile(go_chrome: bool) {
@@ -357,6 +358,7 @@ fn find_profile(go_chrome: bool) {
         println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("{}", "Quitting...".red());
     }
+    succes("Found your default profile");
     //println!("{}", contents);
     let v: Vec<&str> = contents
         .split(|c| c == '=' || c == ']' || c == '\n')
@@ -377,12 +379,6 @@ fn find_profile(go_chrome: bool) {
         } else {
             println!("You chrome directory doesn't exist, so we can't remove it -.-")
         }
-    } else {
-        if go_chrome == true {
-            println!("This application will now attempt to write the files for the firefox customization. \n This will overwrite all files that are now in the chrome directory.");
-        } else {
-            print!("The application will now delete all files in the chrome directory");
-        }
     }
     if go_chrome == true {
         let mut chrome_path = PathBuf::new();
@@ -392,6 +388,7 @@ fn find_profile(go_chrome: bool) {
             "Error: failed to cd into the Chrome dir".red()
         ));
     }
+    succes("Almost everything is finished. Now installing the theme");
 }
 
 fn download(file: &str) {
@@ -401,8 +398,11 @@ fn download(file: &str) {
         .arg("-o")
         .arg("ChromeFiles.zip")
         .status()
-        .expect(&format!("{}", "Error: cURL failed to start".red()));
-
+        .expect(&format!(
+            "{}",
+            "Error: cURL failed to start. Do you have it installed?".red()
+        ));
+    succes("Downloaded the theme now unzipping");
     let file = fs::File::open("ChromeFiles.zip").unwrap();
     let mut archive = ZipArchive::new(file).unwrap();
 
@@ -437,6 +437,7 @@ fn download(file: &str) {
         "{}",
         "Error: failed to rm the Chrome zip file".red()
     ));
+    succes("Finished installing the theme: enjoy!");
 }
 
 fn manual_profile_path() -> String {
@@ -469,7 +470,7 @@ fn install(path: PathBuf, os: &str) {
             "{}",
             "Error: failed to create file in /usr/bin. Got r00t?".red()
         ));
-        fs::copy(std::env::current_exe().unwrap(), "/usr/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\nDo i have the permissions for this executable?".red()));
+        fs::copy(std::env::current_exe().unwrap(), "/usr/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\n Do i have the permissions for this executable?".red()));
 
         /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
             "{}",
@@ -501,7 +502,7 @@ fn install(path: PathBuf, os: &str) {
                 "{}",
                 "Error: update-desktop-database failed to spawn".red()
             ));
-        println!("{}", "Finished installing. Enjoy!");
+        succes("Finished installing Enjoy!");
     } else if os == "windows" {
         fs::create_dir_all ("C:\\Program Files\\themefox\\").expect(&format!(
                     "{}",
@@ -513,6 +514,16 @@ fn install(path: PathBuf, os: &str) {
                     "Error: failed to create file in C:\\Program Files\\themefox\\themefox-manager.exe. Did you run this with elevate permissions?".red()
                 ));
         fs::copy(std::env::current_exe().unwrap(), "C:\\Program Files\\themefox\\themefox-manager.exe").expect(&format!("{}", "Failed to copy executable content to the executable in the C:\\Program Files\\themefox\\themefox-manager.exe directory.\nDo i have the permissions for this executable?".red()));
-        
+        Command::new("curl")
+        .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/protocol-handler.reg")
+        .arg("-o")
+        .arg("C:\\Program Files\\themefox\\themefox-manager.reg")
+        .status()
+        .expect(&format!("{}", "Error: Failed to run the curl command, do you have it installed?".red()));
+        Command::new("reg").arg("import").arg("C:\\Program Files\\themefox\\themefox-manager.reg").status().expect(&format!("{}", "failed to run the red command. Or there was an error, because this shell wasn't launched with elevated permissions"));
     }
+}
+
+fn succes(msg: &str) {
+    println!("{}", format!("✔️ {}", &msg).green());
 }
