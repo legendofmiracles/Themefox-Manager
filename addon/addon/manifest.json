@@ -29,6 +29,8 @@
     "tabs"
   ],
   "browser_action": {
-    "default_icon": "icons/example_icon.png"
+    "default_icon": "icons/example_icon.png",
+    "default_title": "Themefox-manager-addon",
+    "default_popup": "index.html"
   }
 }
