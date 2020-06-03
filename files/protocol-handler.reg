@@ -1,0 +1,7 @@
+HKEY_CLASSES_ROOT
+  themefox-manager
+    (Default) = "URL:themefox-manager Protocol"
+    URL Protocol = "themefox-manager"
+  shell
+    open
+      command (Default) = "C:\Program Files\themefox\themefox-manager.exe" "%1"

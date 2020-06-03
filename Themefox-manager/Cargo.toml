@@ -1,0 +1,26 @@
+[package]
+name = "themefox-manager"
+version = "0.9.9"
+authors = ["The authors Name <legendofmiracles@protonmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "A manager for firefox CSS aka userchrome files"
+readme = "README.md"
+homepage = "https://github.com/themefox/themefox-manager"
+repository = "https://github.com/themefox/themefox-manager"
+license-file = "LICENSE"
+keywords = ["cli", "firefox", "esthetics"]
+categories = ["command-line-interface", ]
+[profile.release]
+panic = 'abort'
+
+[dependencies]
+dirs = "2.0.2"
+clap = "2.33.0"
+zip = "0.5.5"
+serde_json = "1.0"
+dialoguer = "0.6.2"
+colored = "1.9.3"
+#clap_generate = "3.0.0-beta.1"
+#hyper = "0.13"
+#tokio = "0.2.20"
