@@ -1,2 +1,8 @@
+<<<<<<< HEAD
 Themefox-manager/target/
 addon/rust-app/target/
+=======
+/target
+/builds
+/ChromeFiles.zip
+>>>>>>> e884ba44d6f5bd592cd04dbb85db3b0d8f40dcf7

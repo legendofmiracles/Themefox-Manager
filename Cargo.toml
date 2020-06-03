@@ -1,0 +1,18 @@
+[package]
+name = "themefox-manager"
+version = "0.1.0"
+authors = ["The authors Name <legendofmiracles@protonmail.com>"]
+edition = "2018"
+
+[profile.release]
+panic = 'abort'
+
+[dependencies]
+dirs = "2.0.2"
+clap = "2.33.0"
+zip = "0.5.5"
+serde_json = "1.0"
+dialoguer = "0.6.2"
+colored = "1.9.3"
+#hyper = "0.13"
+#tokio = "0.2.20"
