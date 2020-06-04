@@ -2,13 +2,15 @@
 On a click on the browser action, send the app a message.
 */
 browser.browserAction.onClicked.addListener(async () => {
-  function onGot(tabInfo) {
+ /* function onGot(tabInfo) {
     console.log(tabInfo[0].url);
   }
-
+  */
+/*
   function onError(error) {
     console.log(`Error: ${error}`);
   }
+  */
 
   const gettingCurrent = await browser.tabs.query({
     currentWindow: true,

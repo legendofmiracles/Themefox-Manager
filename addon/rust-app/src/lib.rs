@@ -1,20 +1,12 @@
-extern crate serde_json;
-
 use byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
-use std::error::Error;
-use std::fs;
-use std::io;
-use std::io::{Read, Write};
+use serde_json;
+use std::io::{self, Read, Write};
 
 pub fn read_input<R: Read>(mut input: R) -> io::Result<serde_json::Value> {
     let length = input.read_u32::<NativeEndian>().unwrap();
     let mut buffer = vec![0; length as usize];
     input.read_exact(&mut buffer)?;
     let json_val: serde_json::Value = serde_json::from_slice(&buffer).unwrap();
-    let mut file = fs::File::create("/home/legendofmiracles/res.txt").unwrap();
-    file.write_all(format!("{}", json_val).as_bytes());
-    let mut file = fs::File::create("/home/legendofmiracles/res2.txt").unwrap();
-    file.write_all(format!("{}", length).as_bytes());
     Ok(json_val)
 }
 

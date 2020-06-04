@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <head>
-    <meta charset="utf-8"/>
+  <meta charset="utf-8" />
 </head>
 <html>
   <body>
     <form action="" method="POST" class="form">
       <select>
-        <option value="”DO”">Themefox</option>
-        <option value="”GIT”">git</option>
+        <option value="DO">Themefox</option>
+        <option value="GIT">git</option>
       </select>
 
-      <input autocomplete="url" type="text" name="URL" id="URL" required>
+      <input autocomplete="url" type="text" name="URL" id="URL" required />
+      <br />
+      <button id="install-button" name="install">Install</button>
     </form>
+    <script src="popup.js"></script>
   </body>
 </html>

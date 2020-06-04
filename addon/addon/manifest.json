@@ -17,12 +17,6 @@
       "themefox_manager.js"
     ]
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*.themefox.net/*"],
-      "js": ["urlgetter.js"]
-    }
-  ],
   "permissions": [
     "nativeMessaging",
     "*://*.themefox.net/*",
