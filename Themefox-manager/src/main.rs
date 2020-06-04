@@ -593,7 +593,7 @@ fn install(path: PathBuf, os: &str) {
         .arg("C:\\Program Files\\themefox\\themefox-manager.reg")
         .status()
         .expect(&format!("{}", "Error: Failed to run the curl command, do you have it installed?".red()));
-        Command::new("reg").arg("import").arg("C:\\Program Files\\themefox\\themefox-manager.reg").status().expect(&format!("{}", "failed to run the red command. Or there was an error, because this shell wasn't launched with elevated permissions"));
+        //Command::new("reg").arg("import").arg("C:\\Program Files\\themefox\\themefox-manager.reg").status().expect(&format!("{}", "failed to run the red command. Or there was an error, because this shell wasn't launched with elevated permissions"));
     }
 }
 
