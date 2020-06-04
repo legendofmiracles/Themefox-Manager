@@ -16,9 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: cd
-      run: cd "Themefox-manager"
     - name: Build
+      working-directory: Themefox-manager
       run: cargo build --verbose
     - name: Run tests
+      working-directory: Themefox-manager
       run: cargo test --verbose
