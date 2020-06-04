@@ -81,11 +81,11 @@ fn main() {
             // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
             env::set_current_dir(home_dir).expect("Error: failed to cd");
             // checks if the config directory exists
-            if Path::new(".config/firefox-theme-manager").exists() == false {
-                // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager")
-                    .expect(&format!("{}", "Error: failed to mkdir".red()));
-            }
+            //if Path::new(".config/firefox-theme-manager").exists() == false {
+            // creates the config directory if the statement above is false
+            //fs::create_dir_all(".config/firefox-theme-manager")
+            //        .expect(&format!("{}", "Error: failed to mkdir".red()));
+            // }
 
             // The next part is that the program tries to understand with which package manager you have firefox installed
             // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
@@ -649,3 +649,5 @@ fn enable_css() {
         }
     }
 }
+
+fn get_firefox_linux(reset: bool) {}

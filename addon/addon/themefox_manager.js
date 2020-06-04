@@ -8,8 +8,11 @@ function connected(p) {
   //portFromCS.postMessage({ greeting: "hi there content script!" });
   portFromCS.onMessage.addListener(function (m) {
     //console.log("In background script, received message from content script");
-    if (m.output == "ping"){
-      testConnection(); 
+    if (m.output == "ping") {
+      testConnection();
+    } else if (m.output.startsWith("DO")) {
+      console.log(JSON.stringify(m));
+      request(m.url);
     }
   });
 }
@@ -37,11 +40,11 @@ function request(tabURL) {
 }
 
 function onTestResponse(response) {
-  portFromCS.postMessage({message: response["msg"]})
+  portFromCS.postMessage({ message: response["msg"] })
 }
 
 function testConnection() {
-  console.log("Sending test");
+  console.log("Connected");
   var sending = browser.runtime.sendNativeMessage("themefox_manager", "ping");
   sending.then(onTestResponse, onError);
 }

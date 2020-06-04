@@ -1,0 +1,33 @@
+.button {
+    text-align: center;
+    background-color: #0060df;
+    min-height: 32px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-weight: 400;
+    padding: 0 8px;  
+    text-decoration: none;
+    margin: 4px 8px;
+    font-size: 1em;   
+    color: #fff;
+    min-width: 6.3em;
+    ;
+}
+
+body {
+    background-color: rgba(249, 249, 250, 0.1);
+}
+
+.button:hover {
+    background-color: #003eaa;
+}
+
+.body {
+    background-color: #2A2A2E;
+    
+}
+
+#url {
+    color: white;
+    background-color: #2A2A2E;
+}
