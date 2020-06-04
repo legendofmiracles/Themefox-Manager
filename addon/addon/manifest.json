@@ -19,7 +19,6 @@
   },
   "permissions": [
     "nativeMessaging",
-    "*://*.themefox.net/*",
     "tabs"
   ],
   "browser_action": {

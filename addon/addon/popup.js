@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     //console.log("In content script, received message from background script: ");
     console.log(m.message);
     if (m.message != "pong"){
-        browser.browserAction.setPopup()
+        browser.browserAction.setPopup({popup: "error.html"})
     }
     //if ()
   });
