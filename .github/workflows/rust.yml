@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      working-directory: Themefox-manager
+      working-directory: ./addon/rust-app
       run: cargo build --verbose
     - name: Run tests
       working-directory: Themefox-manager
