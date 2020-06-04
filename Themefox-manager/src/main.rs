@@ -403,15 +403,27 @@ fn find_profile(go_chrome: bool) {
     let v: Vec<&str> = contents
         .split(|c| c == '=' || c == ']' || c == '\n')
         .collect();
-    default_profile = v[3];
+    //if env::consts::OS == "windows" {
+    //    default_profile = v[3].replace("/", "\\");
+    //} else {
+    default_profile = v[3].to_string();
+    //}
     if !default_profile.contains(".") {
         println!("{}", "You seem to be using a very old firefox version. Consider updating. \n We do not support such old versions".red());
         panic!("Quitting...".red());
     }
+    let default_profile_path: Vec<&str> = default_profile.split('/').collect();
     let mut new_path = PathBuf::new();
-    new_path.push(default_profile);
+    for el in &default_profile_path {
+        new_path.push(el.trim_end());
+    }
     //println!("{:?}", new_path);
-    env::set_current_dir(new_path).expect("failed to cd. \n Please report this issue on GitHub");
+    env::set_current_dir(new_path).expect(&format!(
+        "{}",
+        "failed to cd. \n Please report this issue on GitHub".red()
+    ));
+    //let new_path = PathBuf::new();
+    //let mut default_profile2 = "Error";
     // Now we are in the default profile, the programm now enables stylesheets, so that the theme will also be shown.
     enable_css();
     if Path::new("chrome").exists() == false {

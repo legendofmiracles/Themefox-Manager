@@ -8,6 +8,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
   var input = document.getElementById("URL") 
   input.value = tab[0].url;
+  document.getElementById("install-button").onclick = install;
   
   // connects to bg script
   myPort = browser.runtime.connect({ name: "lolsu@themefox.net" });
@@ -25,3 +26,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
   
 });
+
+function install(){
+    var mode = document.getElementById("select")
+    var strMode = mode.options[mode.selectedIndex].text
+    console.log("mode: " + strMode);
+    var url = document.getElementById("URL").value;
+    console.log("url: " + url)
+
+}
