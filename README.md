@@ -1,4 +1,5 @@
 # Themefox-Manager
+![Rust](https://github.com/alx365/Themefox-Manager/workflows/Rust/badge.svg?branch=master)
 [![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg)](https://github.com/nikku/works-on-my-machine)[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
 [![forthebadge](https://forthebadge.com/images/badges/fuck-it-ship-it.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://forthebadge.com)
@@ -51,6 +52,8 @@ ARGS:
       
     - Automatically enables toolkit.legacyUserProfileCustomizations.stylesheets, in the settings.
 This program runs on curl/git, so make sure you have that installed, if you want to use that.
+You can install git from here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
+Curl is installed on windows by default.
 
 ## Installing
 
