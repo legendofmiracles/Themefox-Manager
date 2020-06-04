@@ -51,6 +51,8 @@ ARGS:
       
     - Automatically enables toolkit.legacyUserProfileCustomizations.stylesheets, in the settings.
 This program runs on curl/git, so make sure you have that installed, if you want to use that.
+You can install git from here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
+Curl is installed on windows by default.
 
 ## Installing
 
