@@ -422,8 +422,6 @@ fn find_profile(go_chrome: bool) {
         "{}",
         "failed to cd. \n Please report this issue on GitHub".red()
     ));
-    //let new_path = PathBuf::new();
-    //let mut default_profile2 = "Error";
     // Now we are in the default profile, the programm now enables stylesheets, so that the theme will also be shown.
     enable_css();
     if Path::new("chrome").exists() == false {
