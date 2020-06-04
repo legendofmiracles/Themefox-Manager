@@ -1,6 +1,20 @@
 /*
 On a click on the browser action, send the app a message.
 */
+var portFromCS;
+
+function connected(p) {
+  portFromCS = p;
+  //portFromCS.postMessage({ greeting: "hi there content script!" });
+  portFromCS.onMessage.addListener(function (m) {
+    //console.log("In background script, received message from content script");
+    if (m.output == "ping"){
+      testConnection(); 
+    }
+  });
+}
+
+browser.runtime.onConnect.addListener(connected);
 
 
 function onResponse(response) {
@@ -13,8 +27,7 @@ function onError(error) {
   console.log(`Error: ${error}`);
 }
 
-
-function request(tabURL){
+function request(tabURL) {
   console.log("Sending request");
   var sending = browser.runtime.sendNativeMessage(
     "themefox_manager",
@@ -24,18 +37,11 @@ function request(tabURL){
 }
 
 function onTestResponse(response) {
-  if (response["output"] == "pong"){
-    return true;
-  } else {
-    return false;
-  }
+  portFromCS.postMessage({message: response["msg"]})
 }
 
-function testConnection(){
+function testConnection() {
   console.log("Sending test");
-  var sending = browser.runtime.sendNativeMessage(
-    "themefox_manager",
-    "ping"
-  );
-  sending.then(onTestResponse, onTestError);
+  var sending = browser.runtime.sendNativeMessage("themefox_manager", "ping");
+  sending.then(onTestResponse, onError);
 }

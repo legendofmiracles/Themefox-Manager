@@ -36,6 +36,8 @@ ARGS:
 ## Coming features: 
 
     - Very close support with the themefox website (yet to be released)
+    
+    - A addon, to manage the themes, running on native messaging.
 
 ## Already implemented features:
 
