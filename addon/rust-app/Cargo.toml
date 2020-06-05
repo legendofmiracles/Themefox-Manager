@@ -1,6 +1,6 @@
 [package]
 name = "stdin-themefox-manager"
-version = "1.0"
+version = "0.1.0"
 authors = ["Definitly not the author <lolsu@hash.fyi>"]
 edition = "2018"
 

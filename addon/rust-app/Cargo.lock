@@ -36,7 +36,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "stdin-firefox"
+name = "stdin-themefox-manager"
 version = "0.1.0"
 dependencies = [
  "byteorder",

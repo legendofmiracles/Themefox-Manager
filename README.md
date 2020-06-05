@@ -75,6 +75,8 @@ Note that installing from crates.io/package manager is the best way, since you g
 
 ​	Download a binary, for your OS, and run it once without any arguments. Note that root/administator privileges are required for the install.
 
+### Addon
+
 
 
 ## New features: 
