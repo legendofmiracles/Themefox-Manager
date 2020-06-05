@@ -1,23 +1,10 @@
-//extern crate clap;
-extern crate dirs;
-//extern crate zip;
 use clap::{App, Arg};
-
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
+use dirs;
 use serde_json::Value;
-use std::env;
-use std::fs;
-use std::fs::File;
-use std::io;
-use std::io::Read;
-use std::path::Path;
-use std::path::PathBuf;
-use std::process::Command;
-use std::str;
+use std::{env, fs, fs::File, io, io::Read, path::Path, path::PathBuf, process::Command, str};
 use zip::ZipArchive;
-//mod build;
-//use std::io::Write;
 fn main() {
     // The ascii art message
     let message = r#"
@@ -76,47 +63,7 @@ fn main() {
         let os = std::env::consts::OS;
         succes("Fetched your operating system");
         if os == "linux" {
-            // It gets your home directory
-            let home_dir: PathBuf = dirs::home_dir().unwrap();
-            // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect("Error: failed to cd");
-            // checks if the config directory exists
-            //if Path::new(".config/firefox-theme-manager").exists() == false {
-            // creates the config directory if the statement above is false
-            //fs::create_dir_all(".config/firefox-theme-manager")
-            //        .expect(&format!("{}", "Error: failed to mkdir".red()));
-            // }
-
-            // The next part is that the program tries to understand with which package manager you have firefox installed
-            // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-            let native = Path::new(".mozilla/firefox").exists();
-            // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
-            let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
-            // Makes a new variable
-            let mut complete_path = PathBuf::new();
-            // checks If native is true, which is being set to true/false further up
-            if native == true && !matches.is_present("path") {
-                // Prints the message
-                //println!("You have firefox installed via the native package manager");
-                // We already had a very simillar piece of code. Try to understand it yourself :)
-                complete_path.push(".mozilla/firefox");
-                env::set_current_dir(complete_path)
-                    .expect(&format!("{}", "Error: failed to cd".red()));
-            // Checks if the variable that determines if firefox was installed via snap is true
-            } else if snap == true && !matches.is_present("path") {
-                //println!("You have firefox installed via the snap package manager");
-                complete_path.push("snap/firefox/common/.mozilla/firefox");
-                env::set_current_dir(complete_path)
-                    .expect(&format!("{}", "Error: failed to cd".red()));
-            } else {
-                complete_path.push(manual_profile_path());
-                env::set_current_dir(complete_path)
-                    .expect(&format!("{}", "Error: failed to cd".red()));
-            }
-            succes("Got your firefox directory");
-
-            find_profile(false);
-            fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
+            get_firefox_linux(false, matches, "null".to_string())
         } else if os == "macos" {
             // It gets yourd home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
@@ -267,43 +214,7 @@ fn main() {
         succes("Fetched your operating system");
         // If the operating system is linux then it does everything that is in those brackets
         if os == "linux" {
-            // It gets your home directory
-            let home_dir: PathBuf = dirs::home_dir().unwrap();
-            // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect("Error: failed to cd");
-            // checks if the config directory exists
-            /*if Path::new(".config/firefox-theme-manager").exists() == false {
-                // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager")
-                    .expect(&format!("{}", "Error: unable to mkdir".red()));
-            }*/
-
-            // The next part is that the program tries to understand with which package manager you have firefox installed
-            // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-            let native = Path::new(".mozilla/firefox").exists();
-            // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
-            let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
-            // Makes a new variable
-            let mut complete_path = PathBuf::new();
-            // checks If native is true, which is being set to true/false further up
-            if native == true && !matches.is_present("path") {
-                // Prints the message
-                //println!("You have firefox installed via the native package manager");
-                // We already had a very simillar piece of code. Try to understand it yourself :)
-                complete_path.push(".mozilla/firefox");
-
-            // Checks if the variable that determines if firefox was installed via snap is true
-            } else if snap == true && !matches.is_present("path") {
-                //println!("You have firefox installed via the snap package manager");
-                complete_path.push("snap/firefox/common/.mozilla/firefox");
-            } else {
-                complete_path.push(manual_profile_path());
-            }
-            succes("Got your firefox directory");
-            env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
-            find_profile(true);
-
-            download(&download_url, matches.is_present("git"));
+            get_firefox_linux(true, matches, download_url);
         } else if os == "macos" {
             // It gets your home directory
             let home_dir: PathBuf = dirs::home_dir().unwrap();
@@ -650,4 +561,46 @@ fn enable_css() {
     }
 }
 
-fn get_firefox_linux(reset: bool) {}
+fn get_firefox_linux(reset: bool, matches: clap::ArgMatches, download_url: String) {
+    // It gets your home directory
+    let home_dir: PathBuf = dirs::home_dir().unwrap();
+    // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
+    env::set_current_dir(home_dir).expect("Error: failed to cd");
+    // checks if the config directory exists
+    /*if Path::new(".config/firefox-theme-manager").exists() == false {
+        // creates the config directory if the statement above is false
+        fs::create_dir_all(".config/firefox-theme-manager")
+            .expect(&format!("{}", "Error: unable to mkdir".red()));
+    }*/
+
+    // The next part is that the program tries to understand with which package manager you have firefox installed
+    // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
+    let native = Path::new(".mozilla/firefox").exists();
+    // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
+    let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
+    // Makes a new variable
+    let mut complete_path = PathBuf::new();
+    // checks If native is true, which is being set to true/false further up
+    if native == true && !matches.is_present("path") {
+        // Prints the message
+        //println!("You have firefox installed via the native package manager");
+        // We already had a very simillar piece of code. Try to understand it yourself :)
+        complete_path.push(".mozilla/firefox");
+
+    // Checks if the variable that determines if firefox was installed via snap is true
+    } else if snap == true && !matches.is_present("path") {
+        //println!("You have firefox installed via the snap package manager");
+        complete_path.push("snap/firefox/common/.mozilla/firefox");
+    } else {
+        complete_path.push(manual_profile_path());
+    }
+    succes("Got your firefox directory");
+    env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
+    find_profile(reset);
+
+    if reset {
+        download(&download_url, matches.is_present("git"));
+    } else {
+        fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
+    }
+}

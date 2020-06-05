@@ -10,9 +10,11 @@ function connected(p) {
     //console.log("In background script, received message from content script");
     if (m.output == "ping") {
       testConnection();
-    } else if (m.output.startsWith("DO")) {
+    } else if (m.output.startsWith("DO") || m.output.startsWith("git")) {
       console.log(JSON.stringify(m));
-      request(m.url);
+      request(m.url, m.output);
+    } else {
+      console.log("Weird, no correct signal.");
     }
   });
 }
@@ -30,11 +32,11 @@ function onError(error) {
   console.log(`Error: ${error}`);
 }
 
-function request(tabURL) {
+function request(tabURL, mode) {
   console.log("Sending request");
   var sending = browser.runtime.sendNativeMessage(
     "themefox_manager",
-    "DO " + tabURL
+    mode + " " + tabURL
   );
   sending.then(onResponse, onError);
 }
