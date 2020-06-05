@@ -79,7 +79,7 @@ Note that installing from crates.io/package manager is the best way, since you g
 
 ## New features: 
 
-Please leave a pull request, if you want to have new features added.
+Please leave a pull request / open a issue , if you want to have new features added.
 
 
 
