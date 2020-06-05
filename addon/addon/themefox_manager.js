@@ -23,6 +23,12 @@ browser.runtime.onConnect.addListener(connected);
 
 
 function onResponse(response) {
+  if (response["status"] !== null) {
+    response["status"] = response["status"].toString().replace("0", "Sucess")
+  } else {
+    response["status"] = "Failure."
+  }
+  portFromCS.postMessage({ message: "themefox: " + response["output"] + response["error"] + response["status"]});
   console.log("Received stdout: " + response["output"]);
   console.log("Received stderr: " + response["error"]);
   console.log("Quitted with error code: " + response["status"]);

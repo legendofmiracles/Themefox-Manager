@@ -87,9 +87,12 @@ Please leave a pull request, if you want to have new features added.
 This branch is development, so it will be buggy.
 
   1. Install rust (best with rustup, see https://www.rust-lang.org/learn/get-started), and cargo (comes installed with rustup)
-  2. Clone this project, and then go to the root of the project
+  2. Clone this project, and then go to the Themefox-manager dir of the project
   3. Build it with `cargo build --release`
-  4. Enjoy!
+    4. switch back to the root of this project: `cd ..`
+    5. Go into addon/rust-app and also compile that
+    6. You will have to change all of the file locations in the files/ directory, and put them in the right places.
+    7. Enjoy!
 
 
 
