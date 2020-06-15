@@ -641,16 +641,14 @@ fn find_default_profile() {
 }
 
 fn ask_for_profile() {
-    let mut options: Vec<&str> = Vec::new();
+    let mut options: Vec<String> = Vec::new();
     let paths = fs::read_dir(".").unwrap();
     let exceptions = ["Pending Pings", "Crash Reports"];
 
     for path in paths {
         let tmp = path.unwrap();
-        let test = tmp.file_name();
-        let tmp2 = test.to_str().unwrap();
         if tmp.path().is_dir() && !exceptions.contains(&tmp.file_name().to_str().unwrap()) {
-            options.push(tmp2);
+            options.push(tmp.file_name().to_str().unwrap().to_string());
         }
     }
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -662,4 +660,5 @@ fn ask_for_profile() {
         .items(&options[..])
         .interact()
         .unwrap();
+    env::set_current_dir(PathBuf::from(&options[selection])).unwrap();
 }
