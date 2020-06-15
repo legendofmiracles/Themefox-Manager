@@ -1,6 +1,6 @@
 [package]
 name = "themefox-manager"
-version = "0.9.9"
+version = "0.9.10"
 authors = ["The authors Name <legendofmiracles@protonmail.com>"]
 edition = "2018"
 license = "MIT"
