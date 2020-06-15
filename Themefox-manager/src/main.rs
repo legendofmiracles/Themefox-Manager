@@ -91,7 +91,7 @@ fn main() {
             }
             succes("Got your firefox directory");
 
-            find_profile(false);
+            find_profile(false, matches.is_present("profile"));
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         } else if os == "windows" {
             // It gets your home directory
@@ -117,7 +117,7 @@ fn main() {
             }
             succes("Got your firefox directory");
 
-            find_profile(false);
+            find_profile(false, matches.is_present("profile"));
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         }
     } else if matches.is_present("URL") {
@@ -246,7 +246,7 @@ fn main() {
             }
             env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
             succes("Got your firefox directory");
-            find_profile(true);
+            find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else if os == "windows" {
             // It prints "you are on macos"
@@ -270,7 +270,7 @@ fn main() {
             }
             env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
             succes("Got your firefox directory");
-            find_profile(true);
+            find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else {
             eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
@@ -296,47 +296,13 @@ fn main() {
     }
 }
 
-fn find_profile(go_chrome: bool) {
-    let default_profile;
-    let mut contents = String::new();
-    if Path::new("installs.ini").is_file() == true {
-        let mut file = File::open("installs.ini")
-            .expect(&format!("{}", "Error: unable to open installs.ini".red()));
-        file.read_to_string(&mut contents)
-            .expect("Error: Unable to read file");
-    } else if Path::new("profiles.ini").is_file() == true {
-        let mut file = File::open("profiles.ini")
-            .expect(&format!("{}", "Error: unable to open profiles.ini".red()));
-        file.read_to_string(&mut contents)
-            .expect("Error: Unable to read file");
+fn find_profile(go_chrome: bool, find_profile: bool) {
+    if !find_profile {
+        find_default_profile();
     } else {
-        println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
-        panic!("{}", "Quitting...".red());
+        ask_for_profile();
     }
-    succes("Found your default profile");
-    //println!("{}", contents);
-    let v: Vec<&str> = contents
-        .split(|c| c == '=' || c == ']' || c == '\n')
-        .collect();
-    //if env::consts::OS == "windows" {
-    //    default_profile = v[3].replace("/", "\\");
-    //} else {
-    default_profile = v[3].to_string();
-    //}
-    if !default_profile.contains(".") {
-        println!("{}", "You seem to be using a very old firefox version. Consider updating. \n We do not support such old versions".red());
-        panic!("Quitting...".red());
-    }
-    let default_profile_path: Vec<&str> = default_profile.split('/').collect();
-    let mut new_path = PathBuf::new();
-    for el in &default_profile_path {
-        new_path.push(el.trim_end());
-    }
-    //println!("{:?}", new_path);
-    env::set_current_dir(new_path).expect(&format!(
-        "{}",
-        "failed to cd. \n Please report this issue on GitHub".red()
-    ));
+
     // Now we are in the default profile, the programm now enables stylesheets, so that the theme will also be shown.
     enable_css();
     if Path::new("chrome").exists() == false {
@@ -624,11 +590,76 @@ fn get_firefox_linux(reset: bool, matches: clap::ArgMatches, download_url: Strin
     }
     succes("Got your firefox directory");
     env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
-    find_profile(reset);
+    find_profile(reset, matches.is_present("profile"));
 
     if reset {
         download(&download_url, matches.is_present("git"));
     } else {
         fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
     }
+}
+
+fn find_default_profile() {
+    let default_profile;
+    let mut contents = String::new();
+    if Path::new("installs.ini").is_file() == true {
+        let mut file = File::open("installs.ini")
+            .expect(&format!("{}", "Error: unable to open installs.ini".red()));
+        file.read_to_string(&mut contents)
+            .expect("Error: Unable to read file");
+    } else if Path::new("profiles.ini").is_file() == true {
+        let mut file = File::open("profiles.ini")
+            .expect(&format!("{}", "Error: unable to open profiles.ini".red()));
+        file.read_to_string(&mut contents)
+            .expect("Error: Unable to read file");
+    } else {
+        println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+        panic!("{}", "Quitting...".red());
+    }
+    succes("Found your default profile");
+    //println!("{}", contents);
+    let v: Vec<&str> = contents
+        .split(|c| c == '=' || c == ']' || c == '\n')
+        .collect();
+
+    default_profile = v[3].to_string();
+
+    if !default_profile.contains(".") {
+        println!("{}", "You seem to be using a very old firefox version. Consider updating. \n We do not support such old versions. \nIf you want, you can try again with the --profile flag".red());
+        panic!("Quitting...".red());
+    }
+    let default_profile_path: Vec<&str> = default_profile.split('/').collect();
+    let mut new_path = PathBuf::new();
+    for el in &default_profile_path {
+        new_path.push(el.trim_end());
+    }
+    //println!("{:?}", new_path);
+    env::set_current_dir(new_path).expect(&format!(
+        "{}",
+        "failed to cd. \n Please report this issue on GitHub".red()
+    ));
+}
+
+fn ask_for_profile() {
+    let mut options: Vec<&str> = Vec::new();
+    let paths = fs::read_dir(".").unwrap();
+    let exceptions = ["Pending Pings", "Crash Reports"];
+
+    for path in paths {
+        let tmp = path.unwrap();
+        let test = tmp.file_name();
+        let tmp2 = test.to_str().unwrap();
+        if tmp.path().is_dir() && !exceptions.contains(&tmp.file_name().to_str().unwrap()) {
+            options.push(tmp2);
+        }
+    }
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(format!(
+            "{}",
+            "Pick your profile, to install into (navigate with arrow keys)".yellow()
+        ))
+        .default(0)
+        .items(&options[..])
+        .interact()
+        .unwrap();
 }
