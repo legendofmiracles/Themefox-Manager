@@ -476,7 +476,8 @@ fn install(path: PathBuf, os: &str) {
             .expect(&format!("{}", "Error: Failed to cd into a root dir".red()));
         Command::new("sudo")
                 .arg("curl")
-                .arg("https://github.com/alx365/Themefox-Manager/releases/tag/v0.9.9.9")
+                .arg("-L")
+                .arg("https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager")
                 .arg("-o")
                 .arg("/usr/bin/stdin-themefox-manager")
                 .status()
@@ -484,7 +485,7 @@ fn install(path: PathBuf, os: &str) {
         Command::new("curl")
                 .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/v0.9.9.9/files/themefox-manager.json")
                 .arg("-o")
-                .arg("/home/legendofmiracles/.mozilla/native-messaging-hosts/themefox-manager.json")
+                .arg("/home/legendofmiracles/.mozilla/native-messaging-hosts/themefox_manager.json")
                 .status()
                 .expect(&format!("{}", "Error: sudo and/or curl failed to spawn".red()));
         /*
