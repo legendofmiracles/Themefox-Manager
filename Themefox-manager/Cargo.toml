@@ -8,7 +8,7 @@ description = "A manager for firefox CSS aka userchrome files"
 readme = "../README.md"
 homepage = "https://github.com/themefox/themefox-manager"
 repository = "https://github.com/themefox/themefox-manager"
-license-file = "LICENSE"
+license-file = "../LICENSE"
 keywords = ["cli", "firefox", "esthetics"]
 categories = ["command-line-interface", ]
 [profile.release]
