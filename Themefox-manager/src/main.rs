@@ -3,7 +3,10 @@ use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 use dirs;
 use serde_json::Value;
-use std::{env, fs, fs::File, io, io::Read, path::Path, path::PathBuf, process::Command, str};
+use std::{
+    env, fs, fs::File, fs::OpenOptions, io, io::Read, io::Write, path::Path, path::PathBuf,
+    process::Command, str,
+};
 use zip::ZipArchive;
 fn main() {
     // The ascii art message
@@ -33,8 +36,8 @@ fn main() {
                 )
         .arg(
             Arg::with_name("path")
-            .long("path")
-            .short("p")
+            .long("dir")
+            .short("d")
             .help("Sets the path to install to, will automaticly trigger if no path is being found")
             .long_help("Sets the path to install to, will automaticly trigger if no path is being found. Can very well be used to install themes for waterfox, firefox developer edition and other browsers that are a fork from firefox")
         )
@@ -44,10 +47,11 @@ fn main() {
             .short("g")
             .help("Installs from git repo, must be specified in a full URL. For example: https://githost.domain/foo/bar.git. Will remove all other files in the dir")
             //.long("Installs from git repo, must be specified in a full URL. . Will remove all other files in the dir")
-        );
-    //let help = app.print_long_help();
-    //.get_matches();
-    //build::documentation(app);
+        )
+        .arg(Arg::with_name("profile")
+        .long("profile")
+        .short("p")
+        .help("This argument lets you chose which profile you want to install from"));
     let matches = app.get_matches();
     if matches.is_present("reset") {
         if Confirm::new()
@@ -430,6 +434,39 @@ fn download(file: &str, git: bool) {
                 "{}",
                 "Error: git failed to start. Do you have it installed?".red()
             ));
+        /*
+            if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
+            let mut options: Vec<&str> = Vec::new();
+            let paths = fs::read_dir(".").unwrap();
+            // zero loop
+            for dir in paths {
+                let name = &dir.unwrap().path();
+                // First loop
+                if name.is_dir() {
+                    //println!("{:?}", name);
+                    for entry in fs::read_dir(&name).unwrap() {
+                        let path = entry.unwrap().path();
+                        if path.to_str().unwrap() == "userChrome.css"
+                            || path.to_str().unwrap() == "userContent.css"
+                        {
+                            let binding = &dir.unwrap().path().to_str().unwrap();
+                            options.push(binding);
+                        }
+                        // Second loop
+                        if path.is_dir() {
+                            //println!("{:?}", path);
+                            for entry2 in fs::read_dir(path).unwrap() {
+                                let path = entry2.unwrap().path();
+                                println!("{:?}", path);
+                            }
+                        } else {
+                        }
+                    }
+                } else {
+                    println!("Its a file, so it isn't important.");
+                }
+            }
+        }*/
     }
 }
 
@@ -523,8 +560,6 @@ fn succes(msg: &str) {
 }
 
 fn enable_css() {
-    use std::fs::OpenOptions;
-    use std::io::Write;
     // This asssumes that you already are in the profile directory
     let file = PathBuf::from("user.js");
     //let option = ""
@@ -566,13 +601,6 @@ fn get_firefox_linux(reset: bool, matches: clap::ArgMatches, download_url: Strin
     let home_dir: PathBuf = dirs::home_dir().unwrap();
     // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
     env::set_current_dir(home_dir).expect("Error: failed to cd");
-    // checks if the config directory exists
-    /*if Path::new(".config/firefox-theme-manager").exists() == false {
-        // creates the config directory if the statement above is false
-        fs::create_dir_all(".config/firefox-theme-manager")
-            .expect(&format!("{}", "Error: unable to mkdir".red()));
-    }*/
-
     // The next part is that the program tries to understand with which package manager you have firefox installed
     // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
     let native = Path::new(".mozilla/firefox").exists();

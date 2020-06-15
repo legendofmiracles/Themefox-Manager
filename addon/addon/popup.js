@@ -23,9 +23,11 @@ window.addEventListener("DOMContentLoaded", async (event) => {
       message = m.message;
       //console.log(message)
       output();
-    } else if (m.message != "pong") {
-      browser.browserAction.setPopup({ popup: "error.html" })
-      console.log("Error: didn't get a anwser from the native application");
+    } else if (m.message == "pong") {
+      } else {
+        browser.browserAction.setPopup({ popup: "error.html" })
+        console.log("Error: didn't get a anwser from the native application");
+      
     }
     //if ()
   });

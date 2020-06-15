@@ -37,7 +37,7 @@ fn main() {
             Ok(_) => (),
         };
         */
-        
+
         let string = json_val.as_str().unwrap();
         let string: Vec<&str> = string.split_ascii_whitespace().collect();
         let output = Command::new("themefox-manager")
@@ -53,7 +53,6 @@ fn main() {
             Err(why) => panic!("{}", why.to_string()),
             Ok(_) => (),
         };
-        
     } else {
         match lib::write_output(
             io::stdout(),

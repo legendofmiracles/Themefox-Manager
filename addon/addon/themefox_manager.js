@@ -36,6 +36,7 @@ function onResponse(response) {
 
 function onError(error) {
   console.log(`Error: ${error}`);
+  portFromCS.postMessage({ message: "F you frontend" })
 }
 
 function request(tabURL, mode) {
