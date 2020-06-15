@@ -476,12 +476,18 @@ fn install(path: PathBuf, os: &str) {
             .expect(&format!("{}", "Error: Failed to cd into a root dir".red()));
         Command::new("sudo")
                 .arg("curl")
-                .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.desktop")
+                .arg("https://github.com/alx365/Themefox-Manager/releases/tag/v0.9.9.9")
                 .arg("-o")
-                .arg("/usr/share/applications/themefox-manager.desktop")
+                .arg("/usr/bin/stdin-themefox-manager")
                 .status()
-                .expect(&format!("{}", "Error: sudo and/or xdg-mime failed to spawn".red()));
-
+                .expect(&format!("{}", "Error: sudo and/or curl failed to spawn".red()));
+        Command::new("curl")
+                .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/v0.9.9.9/files/themefox-manager.json")
+                .arg("-o")
+                .arg("/home/legendofmiracles/.mozilla/native-messaging-hosts/themefox-manager.json")
+                .status()
+                .expect(&format!("{}", "Error: sudo and/or curl failed to spawn".red()));
+        /*
         Command::new("xdg-mime")
             .arg("default")
             .arg("/usr/share/applications/themefox-manager.desktop")
@@ -498,7 +504,7 @@ fn install(path: PathBuf, os: &str) {
                 "{}",
                 "Error: update-desktop-database failed to spawn".red()
             ));
-
+            */
         succes("Finished installing Enjoy!");
     } else if os == "windows" {
         fs::create_dir_all ("C:\\Program Files\\themefox\\").expect(&format!(
