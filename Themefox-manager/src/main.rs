@@ -400,34 +400,120 @@ fn download(file: &str, git: bool) {
                 "{}",
                 "Error: git failed to start. Do you have it installed?".red()
             ));
-
-        if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
-            let mut options: Vec<&str> = Vec::new();
+        let exceptions = ["userContent.css", "userChrome.css", "userContent.js", "userChrome.js"];
+        let tabu = [".git"];
+        if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() || !Path::new("userContent.js").exists(){
+            let mut options: Vec<String> = Vec::new();
             let paths = fs::read_dir(".").unwrap();
+
             // zero loop
             for dir in paths {
+                //println!("Zero loop");
                 let name = &dir.unwrap().path();
+                //println!("Found a dir: {:?}", &name);
                 // First loop
-                if name.is_dir() {
+                if name.is_dir() && !tabu.contains(&name.file_name().unwrap().to_str().unwrap()) {
                     //println!("{:?}", name);
-                    for entry in fs::read_dir(&name).unwrap() {
-                        let tmp = entry.unwrap().path();
-                        //let dir = &;
-                        if Path::new(&format!("{}/userChrome.css", tmp.to_str().unwrap())).exists()
-                            || !Path::new("userContent.css").exists()
+                    // !after this point the recurive loops are running
+                    for path in fs::read_dir(&name).unwrap() {
+                        // !
+                        //println!("First loop");
+                        //println!("Found a dir: {:?}", &path);
+                        let tmp = path.unwrap();
+                        if !tmp.path().is_dir()
+                            && exceptions.contains(&tmp.file_name().to_str().unwrap())
                         {
-                            //let test = dir;
-                            options.push(tmp.to_str().unwrap());
+                            if !options.contains(&name.to_str().unwrap().to_string()) {
+                                options.push(tmp.path().to_str().unwrap().to_string());
+                            }
+                        // println!("HEY");
+                        } else {
+                            // !
+                            let name = tmp.path();
+                            if tmp.path().is_dir() {
+                                for path2 in fs::read_dir(&name).unwrap() {
+                                    //println!("Third loop");
+                                    let tmp2 = path2.unwrap();
+
+                                    if !tmp2.path().is_dir()
+                                        && exceptions.contains(&tmp2.file_name().to_str().unwrap())
+                                    {
+                                        if !options.contains(&name.to_str().unwrap().to_string()) {
+                                            options.push(name.to_str().unwrap().to_string());
+                                        }
+                                    //println!("HEY");
+                                    } else {
+                                        // !
+                                        let name = tmp2.path();
+                                        if !tmp.path().is_dir() {
+                                            for path3 in fs::read_dir(&name).unwrap() {
+                                                let tmp3 = path3.unwrap();
+                                                if !tmp3.path().is_dir()
+                                                    && exceptions
+                                                        .contains(&tmp3.path().to_str().unwrap())
+                                                {
+                                                    if !options.contains(
+                                                        &name.to_str().unwrap().to_string(),
+                                                    ) {
+                                                        options.push(
+                                                            name.to_str().unwrap().to_string(),
+                                                        );
+                                                    }
+                                                //println!("HEY");
+                                                } else {
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
-                    println!("Its a file, so it isn't important.");
+                    //println!("Its a file, so it isn't important.");
                 }
             }
+            
+            if options.len() > 0 {
+            //println!("{:?}", &options);
+            options.sort();
+
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(format!(
+                    "{}",
+                    "Couldn't find any files, that change the way firefox behaves, we searched 4 directories deep, to find something, here is what we found.\nPick your profile, to install into (navigate with arrow keys)".yellow()
+                ))
+                .default(0)
+                .items(&options[..])
+                .interact()
+                .unwrap();
+            for file in fs::read_dir(Path::new(&options[selection])).unwrap() {
+                let tmp = &file.unwrap().path();
+                //println!("{:?}", tmp);
+
+                syslinks(&tmp);
+
+                //fs::link(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
+            }
+        } else {
+            println!("{}", "Warning: The file doesn't have any files, that change the way firefox looks/behave. Unfortunately we couldn't find anything in the subdirectories".yellow())
+        }
         }
     }
 }
 
+#[cfg(target_os = "linux")]
+fn syslinks(tmp: &std::path::PathBuf) {
+    std::os::unix::fs::symlink(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
+}
+#[cfg(target_os = "windows")]
+fn syslinks() {
+    if tmp.is_dir(tmp: &std::path::PathBuf) {
+        std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap());
+
+        std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap());
+    }
+}
 fn manual_profile_path() -> String {
     eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open directory on the first one. Then navigate back one directory and thats the path you should enter\n" );
     if Confirm::new()
