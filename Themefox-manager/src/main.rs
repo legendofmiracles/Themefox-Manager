@@ -516,9 +516,9 @@ fn syslinks(tmp: &std::path::PathBuf) {
 #[cfg(target_os = "windows")]
 fn syslinks(tmp: &std::path::PathBuf) {
     if tmp.is_dir() {
-        std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap());
+        std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap().expect("Failed to create syslinks"));
 
-        std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap());
+        std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap().expect("Failed to create syslinks"));
     }
 }
 fn manual_profile_path() -> String {
