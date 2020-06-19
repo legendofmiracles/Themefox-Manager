@@ -51,7 +51,7 @@ fn main() {
         .arg(Arg::with_name("profile")
         .long("profile")
         .short("p")
-        .help("This argument lets you chose which profile you want to install from"));
+        .help("This argument lets you chose which profile you want to install to"));
     let matches = app.get_matches();
     if matches.is_present("reset") {
         if Confirm::new()
