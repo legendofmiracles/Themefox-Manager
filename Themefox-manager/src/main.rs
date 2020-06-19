@@ -764,6 +764,7 @@ fn ask_for_profile() {
             options.push(tmp.file_name().to_str().unwrap().to_string());
         }
     }
+    options.sort();
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(format!(
             "{}",
