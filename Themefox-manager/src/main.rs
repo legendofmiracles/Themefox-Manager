@@ -400,9 +400,16 @@ fn download(file: &str, git: bool) {
                 "{}",
                 "Error: git failed to start. Do you have it installed?".red()
             ));
-        let exceptions = ["userContent.css", "userChrome.css", "userContent.js", "userChrome.js"];
+        let exceptions = [
+            "userContent.css",
+            "userChrome.css",
+            "userContent.js",
+            "userChrome.js",
+        ];
         let tabu = [".git"];
-        if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() || !Path::new("userContent.js").exists(){
+        if !Path::new("userChrome.css").exists()
+            || !Path::new("userContent.css").exists()
+        {
             let mut options: Vec<String> = Vec::new();
             let paths = fs::read_dir(".").unwrap();
 
@@ -473,12 +480,12 @@ fn download(file: &str, git: bool) {
                     //println!("Its a file, so it isn't important.");
                 }
             }
-            
-            if options.len() > 0 {
-            //println!("{:?}", &options);
-            options.sort();
 
-            let selection = Select::with_theme(&ColorfulTheme::default())
+            if options.len() > 0 {
+                //println!("{:?}", &options);
+                options.sort();
+
+                let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt(format!(
                     "{}",
                     "Couldn't find any files, that change the way firefox behaves, we searched 4 directories deep, to find something, here is what we found.\nPick your profile, to install into (navigate with arrow keys)".yellow()
@@ -487,17 +494,17 @@ fn download(file: &str, git: bool) {
                 .items(&options[..])
                 .interact()
                 .unwrap();
-            for file in fs::read_dir(Path::new(&options[selection])).unwrap() {
-                let tmp = &file.unwrap().path();
-                //println!("{:?}", tmp);
+                for file in fs::read_dir(Path::new(&options[selection])).unwrap() {
+                    let tmp = &file.unwrap().path();
+                    //println!("{:?}", tmp);
 
-                syslinks(&tmp);
+                    syslinks(&tmp);
 
-                //fs::link(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
+                    //fs::link(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
+                }
+            } else {
+                println!("{}", "Warning: The file doesn't have any files, that change the way firefox looks/behave. Unfortunately we couldn't find anything in the subdirectories".yellow())
             }
-        } else {
-            println!("{}", "Warning: The file doesn't have any files, that change the way firefox looks/behave. Unfortunately we couldn't find anything in the subdirectories".yellow())
-        }
         }
     }
 }
@@ -507,8 +514,8 @@ fn syslinks(tmp: &std::path::PathBuf) {
     std::os::unix::fs::symlink(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
 }
 #[cfg(target_os = "windows")]
-fn syslinks() {
-    if tmp.is_dir(tmp: &std::path::PathBuf) {
+fn syslinks(tmp: &std::path::PathBuf) {
+    if tmp.is_dir() {
         std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap());
 
         std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap());
