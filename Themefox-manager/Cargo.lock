@@ -445,7 +445,7 @@ dependencies = [
 
 [[package]]
 name = "themefox-manager"
-version = "0.9.10"
+version = "0.9.11"
 dependencies = [
  "clap",
  "colored",

@@ -20,7 +20,7 @@ fn main() {
     print!("{}\n", message);
     let app = App::new("themefox-manager")
         .name("themefox-manager")
-        .version("v0.9.9.9")
+        .version("v0.9.11")
         //.set_term_width(if let Some((Width(w), _)) = terminal_size() { w as usize } else { 120 })
         .author("The authors name <lolsu@hash.fyi>")
         .about("Installs themes to your firefox, from a valid themefox url, or git url")
