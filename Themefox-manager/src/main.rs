@@ -400,8 +400,8 @@ fn download(file: &str, git: bool) {
                 "{}",
                 "Error: git failed to start. Do you have it installed?".red()
             ));
-        /*
-            if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
+
+        if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
             let mut options: Vec<&str> = Vec::new();
             let paths = fs::read_dir(".").unwrap();
             // zero loop
@@ -411,28 +411,20 @@ fn download(file: &str, git: bool) {
                 if name.is_dir() {
                     //println!("{:?}", name);
                     for entry in fs::read_dir(&name).unwrap() {
-                        let path = entry.unwrap().path();
-                        if path.to_str().unwrap() == "userChrome.css"
-                            || path.to_str().unwrap() == "userContent.css"
+                        let tmp = entry.unwrap().path();
+                        //let dir = &;
+                        if Path::new(&format!("{}/userChrome.css", tmp.to_str().unwrap())).exists()
+                            || !Path::new("userContent.css").exists()
                         {
-                            let binding = &dir.unwrap().path().to_str().unwrap();
-                            options.push(binding);
-                        }
-                        // Second loop
-                        if path.is_dir() {
-                            //println!("{:?}", path);
-                            for entry2 in fs::read_dir(path).unwrap() {
-                                let path = entry2.unwrap().path();
-                                println!("{:?}", path);
-                            }
-                        } else {
+                            //let test = dir;
+                            options.push(tmp.to_str().unwrap());
                         }
                     }
                 } else {
                     println!("Its a file, so it isn't important.");
                 }
             }
-        }*/
+        }
     }
 }
 
@@ -462,32 +454,53 @@ fn install(path: PathBuf, os: &str) {
     File::create(path).expect(&format!("{}", "Failed to make config directory".red()));
     //file.write_all(b"DO NOT DELETE THIS FILE, IF YOU SHOULD DELETE IS, IT WILL ON THE NEXT STARTUP, WITHOUT ANY ARGUMENTS, TRY TO INSTALL THE CUSTOM PROTOCOL HANDLERS").expect(&format!("{}", "Error: Failed to write to config file".red()))
     if os == "linux" {
-        File::create("/usr/bin/themefox-manager").expect(&format!(
+        File::create("/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!(
             "{}",
-            "Error: failed to create file in /usr/bin. Got r00t?".red()
+            "Error: failed to create file in /.local/bin. Got the right perms?".red()
         ));
-        fs::copy(std::env::current_exe().unwrap(), "/usr/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\n Do i have the permissions for this executable?".red()));
+        fs::copy(std::env::current_exe().unwrap(), "/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\n Do i have the permissions for this executable?".red()));
 
         /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
             "{}",
             "Error: An error occured when deleteing this executable.".red()
         ));*/
-        env::set_current_dir("/usr/share/applications")
-            .expect(&format!("{}", "Error: Failed to cd into a root dir".red()));
-        Command::new("sudo")
-                .arg("curl")
+        Command::new("curl")
                 .arg("-L")
                 .arg("https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager")
                 .arg("-o")
-                .arg("/usr/bin/stdin-themefox-manager")
+                .arg("/home/legendofmiracles/.local/bin/stdin-themefox-manager")
                 .status()
                 .expect(&format!("{}", "Error: sudo and/or curl failed to spawn".red()));
         Command::new("curl")
-                .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/v0.9.9.9/files/themefox-manager.json")
+                .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.json")
                 .arg("-o")
                 .arg("/home/legendofmiracles/.mozilla/native-messaging-hosts/themefox_manager.json")
                 .status()
-                .expect(&format!("{}", "Error: sudo and/or curl failed to spawn".red()));
+                .expect(&format!("{}", "Error: curl failed to complete".red()));
+
+        Command::new("chmod")
+            .arg("+x")
+            .arg("/home/legendofmiracles/.local/bin/stdin-themefox-manager")
+            .arg("/home/legendofmiracles/.local/bin/themefox-manager")
+            .status()
+            .expect(&format!(
+                "{}",
+                "Error: sudo and/or chmod failed to complete"
+            ));
+
+        if Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Do you want to install the browser addon now?")
+            .interact()
+            .unwrap()
+        {
+            println!("You will have to press the add to firefox button");
+            Command::new("firefox")
+                .arg(" --new-tab ")
+                .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
+                .status()
+                .expect(&format!("{}", "firefox failed to spawn".red()));
+        }
+
         /*
         Command::new("xdg-mime")
             .arg("default")
@@ -529,7 +542,7 @@ fn install(path: PathBuf, os: &str) {
 }
 
 fn succes(msg: &str) {
-    println!("{}", format!("✔️ {}", &msg).green());
+    println!("{}", format!("✔ {}", &msg).green());
 }
 
 fn enable_css() {
