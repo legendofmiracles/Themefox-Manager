@@ -289,7 +289,7 @@ fn main() {
         path.push("themefox-manager.txt");
 
         if !path.exists() {
-            install(path, os);
+            install(path, os, matches);
         } else {
             print!("Bad usage.\n Have a look at the usage with the `--help` flag. ");
         }
@@ -391,25 +391,16 @@ fn download(file: &str, git: bool) {
             }
             //println!("Name: {:?}", path.unwrap());
         }
-        Command::new("git")
-            .arg("clone")
-            .arg(file)
-            .arg(".")
-            .status()
-            .expect(&format!(
-                "{}",
-                "Error: git failed to start. Do you have it installed?".red()
-            ));
-        let exceptions = [
-            "userContent.css",
-            "userChrome.css",
-            "userContent.js",
-            "userChrome.js",
-        ];
-        let tabu = [".git"];
-        if !Path::new("userChrome.css").exists()
-            || !Path::new("userContent.css").exists()
-        {
+        download_git(file);
+
+        if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
+            let exceptions = [
+                "userContent.css",
+                "userChrome.css",
+                "userContent.js",
+                "userChrome.js",
+            ];
+            let tabu = [".git"];
             let mut options: Vec<String> = Vec::new();
             let paths = fs::read_dir(".").unwrap();
 
@@ -509,16 +500,40 @@ fn download(file: &str, git: bool) {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(unix)]
+fn download_git(file: &str) {
+    Command::new("git")
+        .arg("clone")
+        .arg(file)
+        .arg(".")
+        .status()
+        .expect(&format!(
+            "{}",
+            "Error: git failed to start. Do you have it installed?".red()
+        ));
+}
+
+#[cfg(windows)]
+fn download_git(file: &str) {
+    use git2::Repository;
+    let _repo = match Repository::clone(file, ".") {
+        Ok(repo) => repo,
+        Err(e) => panic!("failed to clone: {}", e),
+    };
+}
+
+#[cfg(unix)]
 fn syslinks(tmp: &std::path::PathBuf) {
     std::os::unix::fs::symlink(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
 }
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 fn syslinks(tmp: &std::path::PathBuf) {
     if tmp.is_dir() {
-        std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap().expect("Failed to create syslinks"));
+        std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap())
+            .expect("Failed to create syslinks");
 
-        std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap().expect("Failed to create syslinks"));
+        std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap())
+            .expect("Failed to create syslinks");
     }
 }
 fn manual_profile_path() -> String {
@@ -542,7 +557,7 @@ fn manual_profile_path() -> String {
     }
 }
 
-fn install(path: PathBuf, os: &str) {
+fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     println!("Performing first time setup and installing, configuring stuff, so that this application will work.");
     File::create(path).expect(&format!("{}", "Failed to make config directory".red()));
     //file.write_all(b"DO NOT DELETE THIS FILE, IF YOU SHOULD DELETE IS, IT WILL ON THE NEXT STARTUP, WITHOUT ANY ARGUMENTS, TRY TO INSTALL THE CUSTOM PROTOCOL HANDLERS").expect(&format!("{}", "Error: Failed to write to config file".red()))
@@ -551,23 +566,33 @@ fn install(path: PathBuf, os: &str) {
             "{}",
             "Error: failed to create file in /.local/bin. Got the right perms?".red()
         ));
-        fs::copy(std::env::current_exe().unwrap(), "/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\n Do i have the permissions for this executable?".red()));
+        //fs::copy(std::env::current_exe().unwrap(), "/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\n Do i have the permissions for this executable?".red()));
 
         /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
             "{}",
             "Error: An error occured when deleteing this executable.".red()
         ));*/
+        firefox_dir_linux(&matches);
+
+        if !Path::new("native-messaging-hosts").exists() {
+            fs::create_dir("native-messaging-hosts")
+                .expect(&format!("{}", "Failed to mkdir in firefox dir".red()))
+        }
+
+        env::set_current_dir("native-messaging-hosts")
+            .expect(&format!("{}", "Failed changing dir".red()));
+
         Command::new("curl")
                 .arg("-L")
                 .arg("https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager")
                 .arg("-o")
                 .arg("/home/legendofmiracles/.local/bin/stdin-themefox-manager")
                 .status()
-                .expect(&format!("{}", "Error: sudo and/or curl failed to spawn".red()));
+                .expect(&format!("{}", "Error: curl failed to spawn".red()));
         Command::new("curl")
                 .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.json")
                 .arg("-o")
-                .arg("/home/legendofmiracles/.mozilla/native-messaging-hosts/themefox_manager.json")
+                .arg("themefox_manager.json")
                 .status()
                 .expect(&format!("{}", "Error: curl failed to complete".red()));
 
@@ -588,7 +613,7 @@ fn install(path: PathBuf, os: &str) {
         {
             println!("You will have to press the add to firefox button");
             Command::new("firefox")
-                .arg(" --new-tab ")
+                .arg("--new-tab")
                 .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
                 .status()
                 .expect(&format!("{}", "firefox failed to spawn".red()));
@@ -676,33 +701,10 @@ fn enable_css() {
 }
 
 fn get_firefox_linux(reset: bool, matches: clap::ArgMatches, download_url: String) {
-    // It gets your home directory
-    let home_dir: PathBuf = dirs::home_dir().unwrap();
-    // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-    env::set_current_dir(home_dir).expect("Error: failed to cd");
-    // The next part is that the program tries to understand with which package manager you have firefox installed
-    // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-    let native = Path::new(".mozilla/firefox").exists();
-    // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
-    let snap = Path::new("snap/firefox/common/.mozilla/firefox").exists();
-    // Makes a new variable
-    let mut complete_path = PathBuf::new();
-    // checks If native is true, which is being set to true/false further up
-    if native == true && !matches.is_present("path") {
-        // Prints the message
-        //println!("You have firefox installed via the native package manager");
-        // We already had a very simillar piece of code. Try to understand it yourself :)
-        complete_path.push(".mozilla/firefox");
+    firefox_dir_linux(&matches);
+    env::set_current_dir("firefox")
+        .expect(&format!("{}", "failed to cd into the firefox dir".red()));
 
-    // Checks if the variable that determines if firefox was installed via snap is true
-    } else if snap == true && !matches.is_present("path") {
-        //println!("You have firefox installed via the snap package manager");
-        complete_path.push("snap/firefox/common/.mozilla/firefox");
-    } else {
-        complete_path.push(manual_profile_path());
-    }
-    succes("Got your firefox directory");
-    env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
     find_profile(reset, matches.is_present("profile"));
 
     if reset {
@@ -775,4 +777,34 @@ fn ask_for_profile() {
         .interact()
         .unwrap();
     env::set_current_dir(PathBuf::from(&options[selection])).unwrap();
+}
+
+fn firefox_dir_linux(matches: &clap::ArgMatches) {
+    // It gets your home directory
+    let home_dir: PathBuf = dirs::home_dir().unwrap();
+    // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
+    env::set_current_dir(home_dir).expect("Error: failed to cd");
+    // The next part is that the program tries to understand with which package manager you have firefox installed
+    // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
+    let native = Path::new(".mozilla/").exists();
+    // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
+    let snap = Path::new("snap/firefox/common/.mozilla/").exists();
+    // Makes a new variable
+    let mut complete_path = PathBuf::new();
+    // checks If native is true, which is being set to true/false further up
+    if native == true && !matches.is_present("path") {
+        // Prints the message
+        //println!("You have firefox installed via the native package manager");
+        // We already had a very simillar piece of code. Try to understand it yourself :)
+        complete_path.push(".mozilla/");
+
+    // Checks if the variable that determines if firefox was installed via snap is true
+    } else if snap == true && !matches.is_present("path") {
+        //println!("You have firefox installed via the snap package manager");
+        complete_path.push("snap/firefox/common/.mozilla/");
+    } else {
+        complete_path.push(manual_profile_path());
+    }
+    succes("Got your firefox directory");
+    env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
 }

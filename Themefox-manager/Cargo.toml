@@ -11,6 +11,7 @@ repository = "https://github.com/themefox/themefox-manager"
 license-file = "../LICENSE"
 keywords = ["cli", "firefox", "esthetics"]
 categories = ["command-line-interface", ]
+
 [profile.release]
 panic = 'abort'
 
@@ -21,6 +22,10 @@ zip = "0.5.5"
 serde_json = "1.0"
 dialoguer = "0.6.2"
 colored = "1.9.3"
+
+[target.'cfg(windows)'.dependencies]
+git2 = "*"
+
 #clap_generate = "3.0.0-beta.1"
 #hyper = "0.13"
 #tokio = "0.2.20"
