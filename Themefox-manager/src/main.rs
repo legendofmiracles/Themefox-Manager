@@ -575,7 +575,7 @@ fn install_helper() {
     if env::consts::OS == "linux"{
         url = "https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager"
     } else if env::consts::OS == "macos"{
-        url = ;
+        //url = ;
     }
     Command::new("curl")
                 .arg("-L")
