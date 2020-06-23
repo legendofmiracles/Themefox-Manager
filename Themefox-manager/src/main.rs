@@ -69,54 +69,19 @@ fn main() {
         if os == "linux" {
             get_firefox_linux(false, matches, "null".to_string())
         } else if os == "macos" {
-            // It gets yourd home directory
-            let home_dir: PathBuf = dirs::home_dir().unwrap();
-            // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect(&format!("{}", "Error: failed to cd".red()));
-
-            // The next part is that the program tries to understand with which package manager you have firefox installed
-            // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-            let native = Path::new("Library/Application Support/Firefox/Profiles").exists();
-            // Makes a new variable
-            let mut complete_path = PathBuf::new();
-            // checks If native is true, which is being set to true/false further up
-            if native == true && !matches.is_present("path") {
-                // We already had a very simillar piece of code. Try to understand it yourself :)
-                complete_path.push("Library/Application Support/Firefox");
-                env::set_current_dir(complete_path).expect("Error: failed to cd");
-            } else {
-                complete_path.push(manual_profile_path());
-                env::set_current_dir(complete_path)
-                    .expect(&format!("{}", "Error: failed to cd".red()));
-            }
-            succes("Got your firefox directory");
-
+            firefox_dir(&matches);
+            env::set_current_dir("firefox").expect(&format!(
+                "{}",
+                "failed to cd into the firefox dir in the firefox dir".red()
+            ));
             find_profile(false, matches.is_present("profile"));
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         } else if os == "windows" {
-            // It gets your home directory
-            let home_dir: PathBuf = dirs::home_dir().unwrap();
-            // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect(&format!("{}", "Error: failed to cd".red()));
-
-            // The next part is that the program tries to understand with which package manager you have firefox installed
-            // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-            let native = Path::new("AppData\\Roaming\\Mozilla\\Firefox\\Profiles").exists();
-            // Makes a new variable
-            let mut complete_path = PathBuf::new();
-            // checks If native is true, which is being set to true/false further up
-            if native == true && !matches.is_present("path") {
-                // We already had a very simillar piece of code. Try to understand it yourself :)
-                complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
-                env::set_current_dir(complete_path)
-                    .expect(&format!("{}", "Error: failed to cd".red()));
-            } else {
-                complete_path.push(manual_profile_path());
-                env::set_current_dir(complete_path)
-                    .expect(&format!("{}", "Error: failed to cd".red()));
-            }
-            succes("Got your firefox directory");
-
+            firefox_dir(&matches);
+            env::set_current_dir("firefox").expect(&format!(
+                "{}",
+                "failed to cd into the firefox dir in the firefox dir".red()
+            ));
             find_profile(false, matches.is_present("profile"));
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         }
@@ -202,8 +167,8 @@ fn main() {
                     //}
                 }
             } else {
-                println!("The argument you supplied didn't seem to be a correct url, or you didn't supply any url. \n Run with -h in order to see the usage");
-                panic!("{}", "\n There is nothing to do. \n Quitting...".red());
+                println!("The argument you supplied didn't seem to be a correct url, or you didn't supply any url. \nRun with -h in order to see the usage");
+                panic!("{}", "\nThere is nothing to do. \nQuitting...".red());
             }
         } else if matches.is_present("git") {
             let arguments: Vec<String> = env::args().collect();
@@ -220,56 +185,19 @@ fn main() {
         if os == "linux" {
             get_firefox_linux(true, matches, download_url);
         } else if os == "macos" {
-            // It gets your home directory
-            let home_dir: PathBuf = dirs::home_dir().unwrap();
-            // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect(&format!("{}", "Error: unable to cd".red()));
-            // checks if the config directory exists
-            // I know this isn't a common config directory on macos. But i'm lazy
-            if Path::new(".config/firefox-theme-manager").exists() == false {
-                // creates the config directory if the statement above is false
-                fs::create_dir_all(".config/firefox-theme-manager")
-                    .expect("Error: failed to mkdir");
-            }
-
-            // The next part is that the program tries to understand with which package manager you have firefox installed
-            // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-            let native = Path::new("Library/Application Support/Firefox/Profiles").exists();
-            // Makes a new variable
-            let mut complete_path = PathBuf::new();
-            // checks If native is true, which is being set to true/false further up
-            if native == true && !matches.is_present("path") {
-                // We already had a very simillar piece of code. Try to understand it yourself :)
-                complete_path.push("Library/Application Support/Firefox");
-            } else {
-                complete_path.push(manual_profile_path());
-            }
-            env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
-            succes("Got your firefox directory");
+            firefox_dir(&matches);
+            env::set_current_dir("firefox").expect(&format!(
+                "{}",
+                "failed to cd into the firefox dir in the firefox dir".red()
+            ));
             find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else if os == "windows" {
-            // It prints "you are on macos"
-            //println!("You are on windows.");
-            // It gets your home directory
-            let home_dir: PathBuf = dirs::home_dir().unwrap();
-            // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
-            env::set_current_dir(home_dir).expect(&format!("{}", "Error: unable to cd".red()));
-
-            // The next part is that the program tries to understand with which package manager you have firefox installed
-            // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-            let native = Path::new("AppData\\Roaming\\Mozilla\\Firefox\\Profiles").exists();
-            // Makes a new variable
-            let mut complete_path = PathBuf::new();
-            // checks If native is true, which is being set to true/false further up
-            if native == true && !matches.is_present("path") {
-                // We already had a very simillar piece of code. Try to understand it yourself :)
-                complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
-            } else {
-                complete_path.push(manual_profile_path());
-            }
-            env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
-            succes("Got your firefox directory");
+            firefox_dir(&matches);
+            env::set_current_dir("firefox").expect(&format!(
+                "{}",
+                "failed to cd into the firefox dir in the firefox dir".red()
+            ));
             find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else {
@@ -291,7 +219,7 @@ fn main() {
         if !path.exists() {
             install(path, os, matches);
         } else {
-            print!("Bad usage.\n Have a look at the usage with the `--help` flag. ");
+            print!("Bad usage.\nHave a look at the usage with the `--help` flag. ");
         }
     }
 }
@@ -537,7 +465,7 @@ fn syslinks(tmp: &std::path::PathBuf) {
     }
 }
 fn manual_profile_path() -> String {
-    eprintln!("Error: We can not seem to find your firefox folder. \n If you ran this application with elevated permissions, please try again without. \n You can find your profile folder by typing about:profiles in the adress bar and then select the button open directory on the first one. Then navigate back one directory and thats the path you should enter\n" );
+    eprintln!("Error: We can not seem to find your firefox folder. \nIf you ran this application with elevated permissions, please try again without. \nYou can find your profile folder by typing about:profiles in the adress bar and then select the button open directory on the first one. Then navigate back one directory and thats the path you should enter\n" );
     if Confirm::new()
         .with_prompt(format!(
             "{}",
@@ -561,102 +489,112 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     println!("Performing first time setup and installing, configuring stuff, so that this application will work.");
     File::create(path).expect(&format!("{}", "Failed to make config directory".red()));
     //file.write_all(b"DO NOT DELETE THIS FILE, IF YOU SHOULD DELETE IS, IT WILL ON THE NEXT STARTUP, WITHOUT ANY ARGUMENTS, TRY TO INSTALL THE CUSTOM PROTOCOL HANDLERS").expect(&format!("{}", "Error: Failed to write to config file".red()))
-    if os == "linux" {
-        File::create("/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!(
-            "{}",
-            "Error: failed to create file in /.local/bin. Got the right perms?".red()
-        ));
-        //fs::copy(std::env::current_exe().unwrap(), "/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\n Do i have the permissions for this executable?".red()));
 
-        /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
-            "{}",
-            "Error: An error occured when deleteing this executable.".red()
-        ));*/
-        firefox_dir_linux(&matches);
+    //File::create("/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!(
+    //    "{}",
+    //    "Error: failed to create file in /.local/bin. Got the right perms?".red()
+    //));
+    //fs::copy(std::env::current_exe().unwrap(), "/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\nDo i have the permissions for this executable?".red()));
 
+    /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
+        "{}",
+        "Error: An error occured when deleteing this executable.".red()
+    ));*/
+    firefox_dir(&matches);
+
+    if fs::create_dir("native-messaging-hosts").is_err() {
         if !Path::new("native-messaging-hosts").exists() {
-            fs::create_dir("native-messaging-hosts")
-                .expect(&format!("{}", "Failed to mkdir in firefox dir".red()))
+            panic!("Failed to mkdir the native messaging dir in firefox dir, do we have enough permissions?".red())
+        } else {
+            println!("You already had the native-messaging-hosts directory.")
         }
+    }
 
-        env::set_current_dir("native-messaging-hosts")
-            .expect(&format!("{}", "Failed changing dir".red()));
+    env::set_current_dir("native-messaging-hosts")
+        .expect(&format!("{}", "Failed changing dir".red()));
 
-        Command::new("curl")
-                .arg("-L")
-                .arg("https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager")
-                .arg("-o")
-                .arg("/home/legendofmiracles/.local/bin/stdin-themefox-manager")
-                .status()
-                .expect(&format!("{}", "Error: curl failed to spawn".red()));
-        Command::new("curl")
+    Command::new("curl")
                 .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.json")
                 .arg("-o")
                 .arg("themefox_manager.json")
                 .status()
                 .expect(&format!("{}", "Error: curl failed to complete".red()));
 
-        Command::new("chmod")
-            .arg("+x")
-            .arg("/home/legendofmiracles/.local/bin/stdin-themefox-manager")
-            .arg("/home/legendofmiracles/.local/bin/themefox-manager")
+    install_helper();
+
+    if Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Do you want to install the browser addon now?")
+        .interact()
+        .unwrap()
+    {
+        println!("You will have to press the add to firefox button");
+        Command::new("firefox")
+            .arg("--new-tab")
+            .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
             .status()
-            .expect(&format!(
-                "{}",
-                "Error: sudo and/or chmod failed to complete"
-            ));
-
-        if Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Do you want to install the browser addon now?")
-            .interact()
-            .unwrap()
-        {
-            println!("You will have to press the add to firefox button");
-            Command::new("firefox")
-                .arg("--new-tab")
-                .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
-                .status()
-                .expect(&format!("{}", "firefox failed to spawn".red()));
-        }
-
-        /*
-        Command::new("xdg-mime")
-            .arg("default")
-            .arg("/usr/share/applications/themefox-manager.desktop")
-            .arg("x-scheme-handler/themefox-manager")
-            .status()
-            .expect(&format!(
-                "{}",
-                "Error: sudo and/or xdg-mime failed to spawn".red()
-            ));
-
-        Command::new("update-desktop-database")
-            .status()
-            .expect(&format!(
-                "{}",
-                "Error: update-desktop-database failed to spawn".red()
-            ));
-            */
-        succes("Finished installing Enjoy!");
-    } else if os == "windows" {
-        fs::create_dir_all ("C:\\Program Files\\themefox\\").expect(&format!(
-                    "{}",
-                    "Error: failed to create folder in C:\\Program Files\\themefox. Did you run this with elevate permissions?".red()
-                ));
-
-        File::create("C:\\Program Files\\themefox\\themefox-manager.exe").expect(&format!(
-                    "{}",
-                    "Error: failed to create file in C:\\Program Files\\themefox\\themefox-manager.exe. Did you run this with elevate permissions?".red()
-                ));
-        fs::copy(std::env::current_exe().unwrap(), "C:\\Program Files\\themefox\\themefox-manager.exe").expect(&format!("{}", "Failed to copy executable content to the executable in the C:\\Program Files\\themefox\\themefox-manager.exe directory.\nDo i have the permissions for this executable?".red()));
-        Command::new("curl")
-        .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/protocol-handler.reg")
-        .arg("-o")
-        .arg("C:\\Program Files\\themefox\\themefox-manager.reg")
-        .status()
-        .expect(&format!("{}", "Error: Failed to run the curl command, do you have it installed?".red()));
-        //Command::new("reg").arg("import").arg("C:\\Program Files\\themefox\\themefox-manager.reg").status().expect(&format!("{}", "failed to run the red command. Or there was an error, because this shell wasn't launched with elevated permissions"));
+            .expect(&format!("{}", "firefox failed to spawn".red()));
     }
+
+    /*
+    Command::new("xdg-mime")
+        .arg("default")
+        .arg("/usr/share/applications/themefox-manager.desktop")
+        .arg("x-scheme-handler/themefox-manager")
+        .status()
+        .expect(&format!(
+            "{}",
+            "Error: sudo and/or xdg-mime failed to spawn".red()
+        ));
+
+    Command::new("update-desktop-database")
+        .status()
+        .expect(&format!(
+            "{}",
+            "Error: update-desktop-database failed to spawn".red()
+        ));
+        */
+    succes("Finished installing Enjoy!");
+}
+//#[cfg(linux)]
+fn install_helper() {
+    env::set_current_dir(dirs::home_dir().unwrap()).expect(&format!(
+        "{}",
+        "failed to cd into the homdir in the helper function".red()
+    ));
+    let dir
+    if fs::create_dir_all(".local/bin").is_err() {
+        if !Path::new(".local/bin").exists() {
+            panic!(
+                "Couldn't create the .local/bin directory, do we have enough permissions?".red()
+            );
+        } else {
+            println!("You already had the .local/bin directory")
+        }
+    }
+    let mut url = "error";
+    if env::consts::OS == "linux"{
+        url = "https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager"
+    } else if env::consts::OS == "macos"{
+        url = ;
+    }
+    Command::new("curl")
+                .arg("-L")
+                .arg(format!("{}", url))
+                .arg("-o")
+                .arg(format!("{}/.local/bin/stdin-themefox-manager", dirs::home_dir().expect(&format!("{}", "Failed get your home dir".red())).to_str().unwrap()))
+                .status()
+                .expect(&format!("{}", "Error: curl failed to spawn".red()));
+    Command::new("chmod")
+        .arg("+x")
+        .arg(format!(
+            "{}/.local/bin/stdin-themefox-manager",
+            dirs::home_dir()
+                .expect(&format!("{}", "Failed get your home dir".red()))
+                .to_str()
+                .unwrap()
+        ))
+        .status()
+        .expect(&format!("{}", "Error: chmod failed to complete"));
 }
 
 fn succes(msg: &str) {
@@ -701,7 +639,7 @@ fn enable_css() {
 }
 
 fn get_firefox_linux(reset: bool, matches: clap::ArgMatches, download_url: String) {
-    firefox_dir_linux(&matches);
+    firefox_dir(&matches);
     env::set_current_dir("firefox")
         .expect(&format!("{}", "failed to cd into the firefox dir".red()));
 
@@ -728,7 +666,7 @@ fn find_default_profile() {
         file.read_to_string(&mut contents)
             .expect("Error: Unable to read file");
     } else {
-        println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\n Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+        println!("Error: We cannot find your last used or your default profile. because the file is missing, with which we can find out.\nPlease report this issue on github (https://github.com/alx365/Themefox-Manager)");
         panic!("{}", "Quitting...".red());
     }
     succes("Found your default profile");
@@ -740,7 +678,7 @@ fn find_default_profile() {
     default_profile = v[3].to_string();
 
     if !default_profile.contains(".") {
-        println!("{}", "You seem to be using a very old firefox version. Consider updating. \n We do not support such old versions. \nIf you want, you can try again with the --profile flag".red());
+        println!("{}", "You seem to be using a very old firefox version. Consider updating. \nWe do not support such old versions. \nIf you want, you can try again with the --profile flag".red());
         panic!("Quitting...".red());
     }
     let default_profile_path: Vec<&str> = default_profile.split('/').collect();
@@ -751,7 +689,7 @@ fn find_default_profile() {
     //println!("{:?}", new_path);
     env::set_current_dir(new_path).expect(&format!(
         "{}",
-        "failed to cd. \n Please report this issue on GitHub".red()
+        "failed to cd. \nPlease report this issue on GitHub".red()
     ));
 }
 
@@ -779,32 +717,54 @@ fn ask_for_profile() {
     env::set_current_dir(PathBuf::from(&options[selection])).unwrap();
 }
 
-fn firefox_dir_linux(matches: &clap::ArgMatches) {
+fn firefox_dir(matches: &clap::ArgMatches) {
+    let os = env::consts::OS;
+
     // It gets your home directory
     let home_dir: PathBuf = dirs::home_dir().unwrap();
     // It changes the directory in which it is being executed to the previously set variable (in this case it is the homedir)
     env::set_current_dir(home_dir).expect("Error: failed to cd");
-    // The next part is that the program tries to understand with which package manager you have firefox installed
-    // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
-    let native = Path::new(".mozilla/").exists();
-    // The snap one to /home/USER/snap.firefox/common/,mozilla/firefox
-    let snap = Path::new("snap/firefox/common/.mozilla/").exists();
     // Makes a new variable
     let mut complete_path = PathBuf::new();
-    // checks If native is true, which is being set to true/false further up
-    if native == true && !matches.is_present("path") {
-        // Prints the message
-        //println!("You have firefox installed via the native package manager");
-        // We already had a very simillar piece of code. Try to understand it yourself :)
-        complete_path.push(".mozilla/");
+    if os == "linux" {
+        // The next part is that the program tries to understand with which package manager you have firefox installed
+        // The native package manager installs the config files of firefox to /home/USER/.mozilla/firefox
+        let native = Path::new(".mozilla/").exists();
+        // The snap one to /home/USER/snap.firefox/common/.mozilla/firefox
+        let snap = Path::new("snap/firefox/common/.mozilla/").exists();
+        // checks If native is true, which is being set to true/false further up
+        if native == true && !matches.is_present("path") {
+            // Prints the message
+            //println!("You have firefox installed via the native package manager");
+            // We already had a very simillar piece of code. Try to understand it yourself :)
+            complete_path.push(".mozilla/");
 
-    // Checks if the variable that determines if firefox was installed via snap is true
-    } else if snap == true && !matches.is_present("path") {
-        //println!("You have firefox installed via the snap package manager");
-        complete_path.push("snap/firefox/common/.mozilla/");
-    } else {
-        complete_path.push(manual_profile_path());
+        // Checks if the variable that determines if firefox was installed via snap is true
+        } else if snap == true && !matches.is_present("path") {
+            //println!("You have firefox installed via the snap package manager");
+            complete_path.push("snap/firefox/common/.mozilla/");
+        } else {
+            complete_path.push(manual_profile_path());
+        }
+    } else if os == "macos" {
+        let native = Path::new("Library/Application Support/Firefox/Profiles").exists();
+        if native == true && !matches.is_present("path") {
+            // We already had a very simillar piece of code. Try to understand it yourself :)
+            complete_path.push("Library/Application Support/Firefox");
+        } else {
+            complete_path.push(manual_profile_path());
+        }
+    } else if os == "windows" {
+        let native = Path::new("AppData\\Roaming\\Mozilla\\Firefox\\Profiles").exists();
+        // checks If native is true, which is being set to true/false further up
+        if native == true && !matches.is_present("path") {
+            // We already had a very simillar piece of code. Try to understand it yourself :)
+            complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
+        } else {
+            complete_path.push(manual_profile_path());
+        }
     }
+
     succes("Got your firefox directory");
     env::set_current_dir(complete_path).expect(&format!("{}", "Error: unable to cd".red()));
 }
