@@ -1,7 +1,7 @@
 {
   "name": "themefox_manager",
   "description": "Example host for native messaging",
-  "path": "$USER.local/bin/stdin-themefox-manager",
+  "path": "/$USER/.local/bin/stdin-themefox-manager",
   "type": "stdio",
   "allowed_extensions": [ "lolsu@themefox.net" ]
 }

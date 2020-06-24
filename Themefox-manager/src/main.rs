@@ -519,7 +519,17 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
                 //.arg("themefox_manager.json")
                 .output()
                 .expect(&format!("{}", "Error: curl failed to complete".red()));
-    println!("{:?}", str::from_utf8(&file.stdout));
+    let mut user = "F U Windows";
+    if os == "linux" {
+        user = "/home";
+    } else if os == "macos" {
+        user = "/User";
+    }
+
+    let output = str::from_utf8(&file.stdout)
+        .unwrap()
+        .replace("$USER", &format!("{}{}", user,&std::env::var("USER").unwrap()));
+    println!("{}", output);
     install_helper(os);
 
     if Confirm::with_theme(&ColorfulTheme::default())
