@@ -528,7 +528,7 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     println!("{}", user);
     let output = str::from_utf8(&file.stdout)
         .unwrap()
-        .replace("$USER", &format!("{}{}", user,&std::env::var("USER").unwrap()));
+        .replace("$USER", &format!("{}/{}", user,&std::env::var("USER").unwrap()));
     println!("{}", output);
     install_helper(os);
 
