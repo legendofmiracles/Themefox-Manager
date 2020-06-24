@@ -525,7 +525,7 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     } else if os == "macos" {
         user = "/User";
     }
-
+    println!("{}", user);
     let output = str::from_utf8(&file.stdout)
         .unwrap()
         .replace("$USER", &format!("{}{}", user,&std::env::var("USER").unwrap()));
