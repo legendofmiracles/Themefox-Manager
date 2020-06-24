@@ -526,10 +526,14 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
         user = "/User";
     }
     println!("{}", user);
-    let output = str::from_utf8(&file.stdout)
-        .unwrap()
-        .replace("$USER", &format!("{}/{}", user,&std::env::var("USER").unwrap()));
+    let output = str::from_utf8(&file.stdout).unwrap().replace(
+        "$USER",
+        &format!("{}/{}", user, &std::env::var("USER").unwrap()),
+    );
     println!("{}", output);
+    fs::File::create("themefox_manager.json").expect(&format!("{}", 
+        "Error: failed creating the themefox_manager.json file".red()
+    )).write_all(output.as_bytes()).expect(&format!("{}", "Error: failed to write to json config firefox file"));
     install_helper(os);
 
     if Confirm::with_theme(&ColorfulTheme::default())
