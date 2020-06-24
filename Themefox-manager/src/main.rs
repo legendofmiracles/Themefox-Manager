@@ -513,14 +513,14 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     env::set_current_dir("native-messaging-hosts")
         .expect(&format!("{}", "Failed changing dir".red()));
 
-    Command::new("curl")
+    let file = Command::new("curl")
                 .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.json")
-                .arg("-o")
-                .arg("themefox_manager.json")
-                .status()
+                //.arg("-o")
+                //.arg("themefox_manager.json")
+                .output()
                 .expect(&format!("{}", "Error: curl failed to complete".red()));
-
-    install_helper();
+    println!("{:?}", str::from_utf8(&file.stdout));
+    install_helper(os);
 
     if Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt("Do you want to install the browser addon now?")
@@ -556,12 +556,12 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     succes("Finished installing Enjoy!");
 }
 //#[cfg(linux)]
-fn install_helper() {
+fn install_helper(os: &str) {
     env::set_current_dir(dirs::home_dir().unwrap()).expect(&format!(
         "{}",
         "failed to cd into the homdir in the helper function".red()
     ));
-    let dir
+    //let dir
     if fs::create_dir_all(".local/bin").is_err() {
         if !Path::new(".local/bin").exists() {
             panic!(
@@ -572,29 +572,29 @@ fn install_helper() {
         }
     }
     let mut url = "error";
-    if env::consts::OS == "linux"{
+    if os == "linux" {
         url = "https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager"
-    } else if env::consts::OS == "macos"{
-        //url = ;
+    } else if os == "macos" {
+        url = "https://github.com/alx365/Themefox-Manager/releases/download/v0.9.9.9/stdin-themefox-manager-mac";
     }
     Command::new("curl")
-                .arg("-L")
-                .arg(format!("{}", url))
-                .arg("-o")
-                .arg(format!("{}/.local/bin/stdin-themefox-manager", dirs::home_dir().expect(&format!("{}", "Failed get your home dir".red())).to_str().unwrap()))
-                .status()
-                .expect(&format!("{}", "Error: curl failed to spawn".red()));
-    Command::new("chmod")
-        .arg("+x")
-        .arg(format!(
-            "{}/.local/bin/stdin-themefox-manager",
-            dirs::home_dir()
-                .expect(&format!("{}", "Failed get your home dir".red()))
-                .to_str()
-                .unwrap()
-        ))
+        .arg("-L")
+        .arg(format!("{}", url))
+        .arg("-o")
+        .arg(".local/bin/stdin-themefox-manager")
+        //.output()
         .status()
-        .expect(&format!("{}", "Error: chmod failed to complete"));
+        .expect(&format!("{}", "Error: curl failed to spawn".red()));
+    //println!("{:?}", file.stdout);
+    //let output = file.stdout.as_slice();
+    //println!("{:?}", output);
+    if os == "linux" || os == "macos" {
+        Command::new("chmod")
+            .arg("+x")
+            .arg(".local/bin/stdin-themefox-manager")
+            .status()
+            .expect(&format!("{}", "Error: chmod failed to complete"));
+    }
 }
 
 fn succes(msg: &str) {
