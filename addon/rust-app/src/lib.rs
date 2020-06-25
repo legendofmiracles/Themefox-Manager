@@ -10,8 +10,9 @@ pub fn read_input<R: Read>(mut input: R) -> io::Result<serde_json::Value> {
     Ok(json_val)
 }
 
-pub fn write_output<W: Write>(mut output: W, value: &serde_json::Value) -> io::Result<()> {
-    let msg = serde_json::to_string(value)?;
+pub fn write_output<W: Write>(mut output: W, value: std::string::String) -> io::Result<()> {
+    //let msg = serde_json::to_string(value)?;
+    let msg = value;
     let len = msg.len();
     // Chrome won't accept a message larger than 1MB
     if len > 1024 * 1024 {

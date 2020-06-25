@@ -525,15 +525,22 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     } else if os == "macos" {
         user = "/User";
     }
-    println!("{}", user);
+    //println!("{}", user);
     let output = str::from_utf8(&file.stdout).unwrap().replace(
         "$USER",
         &format!("{}/{}", user, &std::env::var("USER").unwrap()),
     );
-    println!("{}", output);
-    fs::File::create("themefox_manager.json").expect(&format!("{}", 
-        "Error: failed creating the themefox_manager.json file".red()
-    )).write_all(output.as_bytes()).expect(&format!("{}", "Error: failed to write to json config firefox file"));
+    //println!("{}", output);
+    fs::File::create("themefox_manager.json")
+        .expect(&format!(
+            "{}",
+            "Error: failed creating the themefox_manager.json file".red()
+        ))
+        .write_all(output.as_bytes())
+        .expect(&format!(
+            "{}",
+            "Error: failed to write to json config firefox file"
+        ));
     install_helper(os);
 
     if Confirm::with_theme(&ColorfulTheme::default())
@@ -548,25 +555,6 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
             .status()
             .expect(&format!("{}", "firefox failed to spawn".red()));
     }
-
-    /*
-    Command::new("xdg-mime")
-        .arg("default")
-        .arg("/usr/share/applications/themefox-manager.desktop")
-        .arg("x-scheme-handler/themefox-manager")
-        .status()
-        .expect(&format!(
-            "{}",
-            "Error: sudo and/or xdg-mime failed to spawn".red()
-        ));
-
-    Command::new("update-desktop-database")
-        .status()
-        .expect(&format!(
-            "{}",
-            "Error: update-desktop-database failed to spawn".red()
-        ));
-        */
     succes("Finished installing Enjoy!");
 }
 //#[cfg(linux)]
