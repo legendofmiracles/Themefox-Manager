@@ -505,7 +505,7 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     } else if os == "macos" {
         env::set_current_dir(dirs::home_dir().unwrap())
             .expect(&format!("{}", "failed to cd into home dir"));
-        env::set_current_dir("Library/Mozilla")
+        env::set_current_dir("Library/Application Support/Mozilla")
             .expect(&format!("{}", "failed to cd into mozilla dir dir"));
     }
     let mut name = "native-messaging-hosts";
