@@ -523,7 +523,7 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     if os == "linux" {
         user = "/home";
     } else if os == "macos" {
-        user = "/User";
+        user = "/Users";
     }
     //println!("{}", user);
     let output = str::from_utf8(&file.stdout).unwrap().replace(
