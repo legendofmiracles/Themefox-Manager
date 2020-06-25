@@ -500,18 +500,27 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
         "{}",
         "Error: An error occured when deleteing this executable.".red()
     ));*/
-    firefox_dir(&matches);
-
-    if fs::create_dir("native-messaging-hosts").is_err() {
-        if !Path::new("native-messaging-hosts").exists() {
+    if os == "linux" {
+        firefox_dir(&matches);
+    } else if os == "macos" {
+        env::set_current_dir(dirs::home_dir().unwrap())
+            .expect(&format!("{}", "failed to cd into home dir"));
+        env::set_current_dir("Library/Mozilla")
+            .expect(&format!("{}", "failed to cd into mozilla dir dir"));
+    }
+    let mut name = "native-messaging-hosts";
+    if os == "macos" {
+        name = "NativeMessagingHosts";
+    }
+    if fs::create_dir(name).is_err() {
+        if !Path::new(name).exists() {
             panic!("Failed to mkdir the native messaging dir in firefox dir, do we have enough permissions?".red())
         } else {
             println!("You already had the native-messaging-hosts directory.")
         }
     }
 
-    env::set_current_dir("native-messaging-hosts")
-        .expect(&format!("{}", "Failed changing dir".red()));
+    env::set_current_dir(name).expect(&format!("{}", "Failed changing dir".red()));
 
     let file = Command::new("curl")
                 .arg("https://raw.githubusercontent.com/alx365/Themefox-Manager/master/files/themefox-manager.json")
@@ -549,11 +558,10 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
         .unwrap()
     {
         println!("You will have to press the add to firefox button");
-        Command::new("firefox")
-            .arg("--new-tab")
+        Command::new("open")
             .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
             .status()
-            .expect(&format!("{}", "firefox failed to spawn".red()));
+            .expect(&format!("{}", "\'open\' failed to spawn".red()));
     }
     succes("Finished installing Enjoy!");
 }
