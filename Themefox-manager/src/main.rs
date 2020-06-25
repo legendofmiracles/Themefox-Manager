@@ -70,10 +70,10 @@ fn main() {
             get_firefox_linux(false, matches, "null".to_string())
         } else if os == "macos" {
             firefox_dir(&matches);
-            env::set_current_dir("firefox").expect(&format!(
-                "{}",
-                "failed to cd into the firefox dir in the firefox dir".red()
-            ));
+            //env::set_current_dir("firefox").expect(&format!(
+            //    "{}",
+            //    "failed to cd into the firefox dir in the firefox dir".red()
+            //));
             find_profile(false, matches.is_present("profile"));
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         } else if os == "windows" {
