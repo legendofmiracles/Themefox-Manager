@@ -186,10 +186,10 @@ fn main() {
             get_firefox_linux(true, matches, download_url);
         } else if os == "macos" {
             firefox_dir(&matches);
-            env::set_current_dir("firefox").expect(&format!(
-                "{}",
-                "failed to cd into the firefox dir in the firefox dir".red()
-            ));
+            //env::set_current_dir("firefox").expect(&format!(
+            //    "{}",
+            //    "failed to cd into the firefox dir in the firefox dir".red()
+            //));
             find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else if os == "windows" {
