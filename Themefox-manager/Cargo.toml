@@ -26,6 +26,8 @@ colored = "1.9.3"
 [target.'cfg(windows)'.dependencies]
 git2 = "*"
 
+[target.'cfg(target_os = "macos")'.dependencies]
+git2 = "*"
 #clap_generate = "3.0.0-beta.1"
 #hyper = "0.13"
 #tokio = "0.2.20"

@@ -438,7 +438,7 @@ fn download(file: &str, git: bool) {
     }
 }
 
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 fn download_git(file: &str) {
     Command::new("git")
         .arg("clone")
@@ -451,7 +451,7 @@ fn download_git(file: &str) {
         ));
 }
 
-#[cfg(windows)]
+#[cfg(target_os =  "windows")]
 fn download_git(file: &str) {
     use git2::Repository;
     let _repo = match Repository::clone(file, ".") {
@@ -460,7 +460,7 @@ fn download_git(file: &str) {
     };
 }
 
-#[cfg(macos)]
+#[cfg(target_os = "macos")]
 fn download_git(file: &str) {
     use git2::Repository;
     let _repo = match Repository::clone(file, ".") {
