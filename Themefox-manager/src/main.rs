@@ -721,13 +721,13 @@ fn ask_for_profile() {
     let mut options: Vec<String> = Vec::new();
     let paths = fs::read_dir(".").unwrap();
     let exceptions = ["Pending Pings", "Crash Reports", "Caches", ".mozilla"];
-    
+
     if env::consts::OS == "macos" || env::consts::OS == "windows" {
         println!("We are in the if thing.");
-        env::set_current_dir(format!("{}/Profiles", env::current_dir().unwrap().to_str().unwrap())).expect(&format!(
+        assert!(env::set_current_dir("Profiles")/*.expect(&format!(
             "{}",
             "Failed to cd into the Profiles dir (windows macos)".red()
-        ));
+        ))*/.is_ok());
     }
     for path in paths {
         println!("{:?}", path);
