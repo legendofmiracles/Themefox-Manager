@@ -467,7 +467,6 @@ fn download_git(file: &str) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
-
 }
 
 #[cfg(unix)]
@@ -729,6 +728,7 @@ fn ask_for_profile() {
         ));
     }
     for path in paths {
+        println!("{:?}", path);
         let tmp = path.unwrap();
         if tmp.path().is_dir() && !exceptions.contains(&tmp.file_name().to_str().unwrap()) {
             options.push(tmp.file_name().to_str().unwrap().to_string());
