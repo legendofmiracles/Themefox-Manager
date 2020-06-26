@@ -451,7 +451,7 @@ fn download_git(file: &str) {
         ));
 }
 
-#[cfg(target_os =  "windows")]
+#[cfg(target_os = "windows")]
 fn download_git(file: &str) {
     use git2::Repository;
     let _repo = match Repository::clone(file, ".") {
@@ -467,6 +467,7 @@ fn download_git(file: &str) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
+
 }
 
 #[cfg(unix)]
@@ -734,6 +735,7 @@ fn ask_for_profile() {
         }
     }
     options.sort();
+    println!("{:?}", options);
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(format!(
             "{}",
