@@ -48,10 +48,18 @@ fn main() {
             .help("Installs from git repo, must be specified in a full URL. For example: https://githost.domain/foo/bar.git. Will remove all other files in the dir")
             //.long("Installs from git repo, must be specified in a full URL. . Will remove all other files in the dir")
         )
-        .arg(Arg::with_name("profile")
-        .long("profile")
-        .short("p")
-        .help("This argument lets you chose which profile you want to install to"));
+        .arg(
+            Arg::with_name("profile")
+            .long("profile")
+            .short("p")
+            .help("This argument lets you chose which profile you want to install to")
+        )
+        .arg(
+            Arg::with_name("addon")
+            .long("addon")
+            .short("a")
+            .help("This argument installs the files on client side, for the browser addon to work.")
+        );
     let matches = app.get_matches();
     if matches.is_present("reset") {
         if Confirm::new()
@@ -172,7 +180,7 @@ fn main() {
             }
         } else if matches.is_present("git") {
             let arguments: Vec<String> = env::args().collect();
-            println!("{}", arguments[0]);
+            //println!("{}", arguments[0]);
             let mut _the_argument: Vec<&str> = Vec::new();
             _the_argument = arguments[arguments.len() - 1].split(' ').collect();
             download_url = _the_argument[0].to_string();
@@ -204,7 +212,7 @@ fn main() {
             eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
             panic!("{}", "Quitting...".red());
         }
-    } else {
+    } else if matches.is_present("addon") {
         let os = std::env::consts::OS;
         let mut path: PathBuf = PathBuf::new();
         //path.push("/usr/share/themefox");
@@ -214,13 +222,15 @@ fn main() {
             "{}",
             "Failed to make config file in the config dir".red()
         ));
-        path.push("themefox-manager.txt");
+        path.push("themefox-manager");
 
         if !path.exists() {
             install(path, os, matches);
         } else {
             print!("Bad usage.\nHave a look at the usage with the `--help` flag. ");
         }
+    } else {
+        print!("Bad usage.\nHave a look at the usage with the `--help` flag. ");
     }
 }
 
@@ -428,7 +438,7 @@ fn download(file: &str, git: bool) {
     }
 }
 
-#[cfg(unix)]
+#[cfg(linux)]
 fn download_git(file: &str) {
     Command::new("git")
         .arg("clone")
@@ -442,6 +452,15 @@ fn download_git(file: &str) {
 }
 
 #[cfg(windows)]
+fn download_git(file: &str) {
+    use git2::Repository;
+    let _repo = match Repository::clone(file, ".") {
+        Ok(repo) => repo,
+        Err(e) => panic!("failed to clone: {}", e),
+    };
+}
+
+#[cfg(macos)]
 fn download_git(file: &str) {
     use git2::Repository;
     let _repo = match Repository::clone(file, ".") {
@@ -487,19 +506,10 @@ fn manual_profile_path() -> String {
 
 fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
     println!("Performing first time setup and installing, configuring stuff, so that this application will work.");
-    File::create(path).expect(&format!("{}", "Failed to make config directory".red()));
-    //file.write_all(b"DO NOT DELETE THIS FILE, IF YOU SHOULD DELETE IS, IT WILL ON THE NEXT STARTUP, WITHOUT ANY ARGUMENTS, TRY TO INSTALL THE CUSTOM PROTOCOL HANDLERS").expect(&format!("{}", "Error: Failed to write to config file".red()))
-
-    //File::create("/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!(
-    //    "{}",
-    //    "Error: failed to create file in /.local/bin. Got the right perms?".red()
-    //));
-    //fs::copy(std::env::current_exe().unwrap(), "/home/legendofmiracles/.local/bin/themefox-manager").expect(&format!("{}", "Failed to copy executable content to the executable in the /usr/bin directory.\nDo i have the permissions for this executable?".red()));
-
-    /*fs::remove_file(std::env::current_exe().unwrap()).expect(&format!(
+    File::create(path).expect(&format!(
         "{}",
-        "Error: An error occured when deleteing this executable.".red()
-    ));*/
+        "Failed to make \"once ran file\" in the config dir.".red()
+    ));
     if os == "linux" {
         firefox_dir(&matches);
     } else if os == "macos" {
@@ -608,7 +618,7 @@ fn install_helper(os: &str) {
 }
 
 fn succes(msg: &str) {
-    println!("{}", format!("✔ {}", &msg).green());
+    println!("{}", format!("✔  {}", &msg).green());
 }
 
 fn enable_css() {
@@ -642,8 +652,12 @@ fn enable_css() {
                 "\nuser_pref(\"toolkit.legacyUserProfileCustomizations.stylesheets\", true); "
             ) {
                 eprintln!("Couldn't write to file: {}", e);
+                eprintln!(
+                    "You will have to enable them manually, if you do not yet have them enabled."
+                );
+            } else {
+                succes("Enabled stylesheets in your browsers settings");
             }
-            succes("Enabled stylesheets in your browsers settings");
         }
     }
 }
@@ -707,7 +721,12 @@ fn ask_for_profile() {
     let mut options: Vec<String> = Vec::new();
     let paths = fs::read_dir(".").unwrap();
     let exceptions = ["Pending Pings", "Crash Reports", "Caches", ".mozilla"];
-
+    if env::consts::OS == "macos" || env::consts::OS == "windows" {
+        env::set_current_dir("Profiles").expect(&format!(
+            "{}",
+            "Failed to cd into the Profiles dir (windows macos)".red()
+        ));
+    }
     for path in paths {
         let tmp = path.unwrap();
         if tmp.path().is_dir() && !exceptions.contains(&tmp.file_name().to_str().unwrap()) {
