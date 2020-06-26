@@ -438,7 +438,7 @@ fn download(file: &str, git: bool) {
     }
 }
 
-#[cfg(linux)]
+#[cfg(unix)]
 fn download_git(file: &str) {
     Command::new("git")
         .arg("clone")
