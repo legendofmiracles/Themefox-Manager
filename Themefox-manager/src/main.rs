@@ -724,7 +724,7 @@ fn ask_for_profile() {
     
     if env::consts::OS == "macos" || env::consts::OS == "windows" {
         println!("We are in the if thing.");
-        env::set_current_dir("Profiles").expect(&format!(
+        env::set_current_dir(format!("{}/Profiles", env::current_dir().unwrap().to_str().unwrap())).expect(&format!(
             "{}",
             "Failed to cd into the Profiles dir (windows macos)".red()
         ));
