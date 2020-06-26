@@ -722,7 +722,7 @@ fn ask_for_profile() {
     let exceptions = ["Pending Pings", "Crash Reports", "Caches", ".mozilla"];
     
     if env::consts::OS == "macos" || env::consts::OS == "windows" {
-        println!("We are in the if thing.");
+        //println!("We are in the if thing.");
         env::set_current_dir("Profiles").expect(&format!(
             "{}",
             "Failed to cd into the Profiles dir (windows macos)".red()
@@ -730,14 +730,14 @@ fn ask_for_profile() {
     }
     let paths = fs::read_dir(".").unwrap();
     for path in paths {
-        println!("{:?}", path);
+        //println!("{:?}", path);
         let tmp = path.unwrap();
         if tmp.path().is_dir() && !exceptions.contains(&tmp.file_name().to_str().unwrap()) {
             options.push(tmp.file_name().to_str().unwrap().to_string());
         }
     }
     options.sort();
-    println!("{:?}", options);
+    //println!("{:?}", options);
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(format!(
             "{}",
