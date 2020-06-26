@@ -722,6 +722,7 @@ fn ask_for_profile() {
     let paths = fs::read_dir(".").unwrap();
     let exceptions = ["Pending Pings", "Crash Reports", "Caches", ".mozilla"];
     if env::consts::OS == "macos" || env::consts::OS == "windows" {
+        println!("TEST");
         env::set_current_dir("Profiles").expect(&format!(
             "{}",
             "Failed to cd into the Profiles dir (windows macos)".red()
