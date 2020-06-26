@@ -721,6 +721,7 @@ fn ask_for_profile() {
     let mut options: Vec<String> = Vec::new();
     let paths = fs::read_dir(".").unwrap();
     let exceptions = ["Pending Pings", "Crash Reports", "Caches", ".mozilla"];
+    println!("{}", env::consts::OS);
     if env::consts::OS == "macos" || env::consts::OS == "windows" {
         println!("TEST");
         env::set_current_dir("Profiles").expect(&format!(
