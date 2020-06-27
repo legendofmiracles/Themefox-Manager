@@ -65,17 +65,21 @@ Note that installing from crates.io/package manager is the best way, since you g
 
 ​	Install `cargo`, and then run `cargo install themefox-manager`, to install it from crates.io.
 
-​	Then to install it, run the program once, with administrator/root priviliges, without any args.
-
 ### Package manager
 
 ​	AUR version will be released, once the version is in 1.0
 
 ### Binaries online
 
-​	Download a binary, for your OS, and run it once without any arguments. Note that root/administator privileges are required for the install.
+​	Download a binary, for your OS, and place it somewhere, add it to your path, and then you should be able to use it.
 
 ### Addon
+
+​	There is a addon, to make it more user friendly, currently the addon doesn't support stdin stuff, so the user can't be running `-p` `-d` 	and also can't chose the flavour to install.
+
+​	Note that the addon currently supports linux and macos only, since i haven't had enough time for windows.
+
+​	To install the stuff on client side, run `themefox-manager --addon`, which will make two files, once a native messaging manifest, in 	the native messaging dir (on linux its in the firefox dir, on mac its in the ~/Library/Application Support/Mozilla/ dir), and once it puts a 	new executable in the ~/.local/bin dir (i might merge these two executables any time soon).
 
 
 
@@ -91,10 +95,10 @@ This branch is development, so it will be buggy.
   1. Install rust (best with rustup, see https://www.rust-lang.org/learn/get-started), and cargo (comes installed with rustup)
   2. Clone this project, and then go to the Themefox-manager dir of the project
   3. Build it with `cargo build --release`
-    4. switch back to the root of this project: `cd ..`
-    5. Go into addon/rust-app and also compile that
-    6. You will have to change all of the file locations in the files/ directory, and put them in the right places.
-    7. Enjoy!
+        4. switch back to the root of this project: `cd ..`
+            5. Go into addon/rust-app and also compile that
+                6. You will have to change all of the file locations in the files/ directory, and put them in the right places.
+                    7. Enjoy!
 
 
 

@@ -49,11 +49,13 @@ function request(tabURL, mode) {
 }
 
 function onTestResponse(response) {
+  console.log(response)
   portFromCS.postMessage({ message: response["msg"] })
+  console.log("Connected");
 }
 
 function testConnection() {
-  console.log("Connected");
-  var sending = browser.runtime.sendNativeMessage("themefox_manager", "ping");
+  
+  var sending = browser.runtime.sendNativeMessage("themefox_manager", {"message": "ping"});
   sending.then(onTestResponse, onError);
 }

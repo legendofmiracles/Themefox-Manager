@@ -214,21 +214,7 @@ fn main() {
         }
     } else if matches.is_present("addon") {
         let os = std::env::consts::OS;
-        let mut path: PathBuf = PathBuf::new();
-        //path.push("/usr/share/themefox");
-        path.push(dirs::config_dir().expect(&format!("{}", "Failed to get your config dir".red())));
-        path.push("themefox-manager");
-        fs::create_dir_all(&path).expect(&format!(
-            "{}",
-            "Failed to make config file in the config dir".red()
-        ));
-        path.push("themefox-manager");
-
-        if !path.exists() {
-            install(path, os, matches);
-        } else {
-            print!("Bad usage.\nHave a look at the usage with the `--help` flag. ");
-        }
+        install(os, matches);
     } else {
         print!("Bad usage.\nHave a look at the usage with the `--help` flag. ");
     }
@@ -504,12 +490,12 @@ fn manual_profile_path() -> String {
     }
 }
 
-fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
+fn install(os: &str, matches: clap::ArgMatches) {
     println!("Performing first time setup and installing, configuring stuff, so that this application will work.");
-    File::create(path).expect(&format!(
-        "{}",
-        "Failed to make \"once ran file\" in the config dir.".red()
-    ));
+    //File::create(path).expect(&format!(
+    //    "{}",
+    //    "Failed to make \"once ran file\" in the config dir.".red()
+    //));
     if os == "linux" {
         firefox_dir(&matches);
     } else if os == "macos" {
@@ -568,11 +554,19 @@ fn install(path: PathBuf, os: &str, matches: clap::ArgMatches) {
         .unwrap()
     {
         println!("You will have to press the add to firefox button");
-        Command::new("open")
-            .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
-            .status()
-            .expect(&format!("{}", "\'open\' failed to spawn".red()));
-    }
+        if os == "macos" {
+            Command::new("open")
+                .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
+                .status()
+                .expect(&format!("{}", "\'open\' failed to spawn".red()));
+        } else if os == "linux" {
+            Command::new("firefox")
+                .arg("--new-tab")
+                .arg("https://addons.mozilla.org/en-US/firefox/addon/themefox-manager/")
+                .status()
+                .expect(&format!("{}", "\'firefox\' failed to spawn".red()));
+        }
+    } 
     succes("Finished installing Enjoy!");
 }
 //#[cfg(linux)]
@@ -720,9 +714,8 @@ fn find_default_profile() {
 fn ask_for_profile() {
     let mut options: Vec<String> = Vec::new();
     let exceptions = ["Pending Pings", "Crash Reports", "Caches", ".mozilla"];
-    
+
     if env::consts::OS == "macos" || env::consts::OS == "windows" {
-        //println!("We are in the if thing.");
         env::set_current_dir("Profiles").expect(&format!(
             "{}",
             "Failed to cd into the Profiles dir (windows macos)".red()
@@ -782,7 +775,6 @@ fn firefox_dir(matches: &clap::ArgMatches) {
     } else if os == "macos" {
         let native = Path::new("Library/Application Support/Firefox/Profiles").exists();
         if native == true && !matches.is_present("path") {
-            // We already had a very simillar piece of code. Try to understand it yourself :)
             complete_path.push("Library/Application Support/Firefox");
         } else {
             complete_path.push(manual_profile_path());
@@ -791,7 +783,6 @@ fn firefox_dir(matches: &clap::ArgMatches) {
         let native = Path::new("AppData\\Roaming\\Mozilla\\Firefox\\Profiles").exists();
         // checks If native is true, which is being set to true/false further up
         if native == true && !matches.is_present("path") {
-            // We already had a very simillar piece of code. Try to understand it yourself :)
             complete_path.push("AppData\\Roaming\\Mozilla\\Firefox");
         } else {
             complete_path.push(manual_profile_path());

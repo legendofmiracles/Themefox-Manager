@@ -1,6 +1,7 @@
 var myport;
 var message;
 window.addEventListener("DOMContentLoaded", async (event) => {
+ // browser.browserAction.setPopup({ popup: "index.html" })
   var tab = await browser.tabs.query({
     currentWindow: true,
     active: true,
@@ -23,9 +24,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
       message = m.message;
       //console.log(message)
       output();
-    } else if (m.message == "pong") {
-      } else {
-        browser.browserAction.setPopup({ popup: "error.html" })
+    } else if (m.message == "pong") { } else {
+        //  browser.browserAction.setPopup({ popup: "error.html" })
         console.log("Error: didn't get a anwser from the native application");
       
     }
