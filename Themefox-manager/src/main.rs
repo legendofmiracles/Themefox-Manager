@@ -316,7 +316,7 @@ fn download(file: &str, git: bool) {
             //println!("Name: {:?}", path.unwrap());
         }
         download_git(file);
-
+        // The program looks if two key files exist, in the download, if not it proceeds
         if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
             let exceptions = [
                 "userContent.css",
@@ -327,39 +327,49 @@ fn download(file: &str, git: bool) {
             let tabu = [".git"];
             let mut options: Vec<String> = Vec::new();
             let paths = fs::read_dir(".").unwrap();
-
+            // for thing in this directory
             // zero loop
             for dir in paths {
                 //println!("Zero loop");
+                // sets name to the thing in the directry
                 let name = &dir.unwrap().path();
                 //println!("Found a dir: {:?}", &name);
                 // First loop
+                // Checks if name is a directory and if its not an exception like .git
                 if name.is_dir() && !tabu.contains(&name.file_name().unwrap().to_str().unwrap()) {
                     //println!("{:?}", name);
                     // !after this point the recurive loops are running
+                    // Checks the content of the dir in the current dir
                     for path in fs::read_dir(&name).unwrap() {
                         // !
                         //println!("First loop");
                         //println!("Found a dir: {:?}", &path);
                         let tmp = path.unwrap();
+                        // Checks that its not a dir and if it already exists in the exceptions variable, so that only the right files can pass
                         if !tmp.path().is_dir()
                             && exceptions.contains(&tmp.file_name().to_str().unwrap())
                         {
+                            // Then it checks if it already exists in the vec
                             if !options.contains(&name.to_str().unwrap().to_string()) {
+                                // Adds the dir to the vec
                                 options.push(tmp.path().to_str().unwrap().to_string());
                             }
                         // println!("HEY");
                         } else {
                             // !
+                            // sets name to the last dir we were in
                             let name = tmp.path();
+                            // Checks if it is a dir, because we don't want to visit files
                             if tmp.path().is_dir() {
+                                //reads every file in the dir
+                                println!("{:?}", name);
                                 for path2 in fs::read_dir(&name).unwrap() {
-                                    //println!("Third loop");
                                     let tmp2 = path2.unwrap();
 
                                     if !tmp2.path().is_dir()
                                         && exceptions.contains(&tmp2.file_name().to_str().unwrap())
                                     {
+                                        //println!("Test0");
                                         if !options.contains(&name.to_str().unwrap().to_string()) {
                                             options.push(name.to_str().unwrap().to_string());
                                         }
@@ -367,12 +377,13 @@ fn download(file: &str, git: bool) {
                                     } else {
                                         // !
                                         let name = tmp2.path();
-                                        if !tmp.path().is_dir() {
+                                        println!("{:?}", name);
+                                        if tmp2.path().is_dir() {
                                             for path3 in fs::read_dir(&name).unwrap() {
                                                 let tmp3 = path3.unwrap();
                                                 if !tmp3.path().is_dir()
                                                     && exceptions
-                                                        .contains(&tmp3.path().to_str().unwrap())
+                                                        .contains(&tmp3.file_name().to_str().unwrap())
                                                 {
                                                     if !options.contains(
                                                         &name.to_str().unwrap().to_string(),
@@ -383,6 +394,110 @@ fn download(file: &str, git: bool) {
                                                     }
                                                 //println!("HEY");
                                                 } else {
+                                                    // !
+                                                    let name = tmp3.path();
+
+                                                    println!("{:?}", name);
+                                                    if tmp3.path().is_dir() {
+                                                        for path4 in fs::read_dir(&name).unwrap() {
+                                                            let tmp4 = path4.unwrap();
+                                                            if !tmp4.path().is_dir()
+                                                                && exceptions.contains(
+                                                                    &tmp4.file_name().to_str().unwrap(),
+                                                                )
+                                                            {
+                                                                if !options.contains(
+                                                                    &name
+                                                                        .to_str()
+                                                                        .unwrap()
+                                                                        .to_string(),
+                                                                ) {
+                                                                    options.push(
+                                                                        name.to_str()
+                                                                            .unwrap()
+                                                                            .to_string(),
+                                                                    );
+                                                                }
+                                                            //println!("HEY");
+                                                            } else {
+                                                                // !
+                                                                let name = tmp4.path();
+                                                                println!("{:?}", name);
+                                                                if tmp4.path().is_dir() {
+                                                                    for path5 in
+                                                                        fs::read_dir(&name).unwrap()
+                                                                    {
+                                                                        let tmp5 = path5.unwrap();
+                                                                        if !tmp5.path().is_dir()
+                                                                            && exceptions.contains(
+                                                                                &tmp5
+                                                                                    .file_name()
+                                                                                    .to_str()
+                                                                                    .unwrap(),
+                                                                            )
+                                                                        {
+                                                                            if !options.contains(
+                                                                                &name
+                                                                                    .to_str()
+                                                                                    .unwrap()
+                                                                                    .to_string(),
+                                                                            ) {
+                                                                                options.push(
+                                                                                    name.to_str()
+                                                                                        .unwrap()
+                                                                                        .to_string(
+                                                                                        ),
+                                                                                );
+                                                                            }
+                                                                        //println!("HEY");
+                                                                        } else {
+                                                                            // !
+                                                                            let name = tmp5.path();
+                                                                            println!("{:?}", name);
+                                                                            if tmp5.path().is_dir()
+                                                                            {
+                                                                                for path6 in
+                                                                                    fs::read_dir(
+                                                                                        &name,
+                                                                                    )
+                                                                                    .unwrap()
+                                                                                {
+                                                                                    let tmp6 =
+                                                                                        path6
+                                                                                            .unwrap(
+                                                                                            );
+                                                                                    if !tmp6.path().is_dir()
+                                                                            && exceptions.contains(
+                                                                                &tmp6
+                                                                                    .file_name()
+                                                                                    .to_str()
+                                                                                    .unwrap(),
+                                                                            )
+                                                                        {
+                                                                            if !options.contains(
+                                                                                &name
+                                                                                    .to_str()
+                                                                                    .unwrap()
+                                                                                    .to_string(),
+                                                                            ) {
+                                                                                options.push(
+                                                                                    name.to_str()
+                                                                                        .unwrap()
+                                                                                        .to_string(
+                                                                                        ),
+                                                                                );
+                                                                            }
+                                                                        //println!("HEY");
+                                                                        } else {
+                                                                        }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -566,7 +681,7 @@ fn install(os: &str, matches: clap::ArgMatches) {
                 .status()
                 .expect(&format!("{}", "\'firefox\' failed to spawn".red()));
         }
-    } 
+    }
     succes("Finished installing Enjoy!");
 }
 //#[cfg(linux)]
