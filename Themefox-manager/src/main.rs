@@ -382,8 +382,9 @@ fn download(file: &str, git: bool) {
                                             for path3 in fs::read_dir(&name).unwrap() {
                                                 let tmp3 = path3.unwrap();
                                                 if !tmp3.path().is_dir()
-                                                    && exceptions
-                                                        .contains(&tmp3.file_name().to_str().unwrap())
+                                                    && exceptions.contains(
+                                                        &tmp3.file_name().to_str().unwrap(),
+                                                    )
                                                 {
                                                     if !options.contains(
                                                         &name.to_str().unwrap().to_string(),
@@ -403,7 +404,10 @@ fn download(file: &str, git: bool) {
                                                             let tmp4 = path4.unwrap();
                                                             if !tmp4.path().is_dir()
                                                                 && exceptions.contains(
-                                                                    &tmp4.file_name().to_str().unwrap(),
+                                                                    &tmp4
+                                                                        .file_name()
+                                                                        .to_str()
+                                                                        .unwrap(),
                                                                 )
                                                             {
                                                                 if !options.contains(
@@ -518,7 +522,7 @@ fn download(file: &str, git: bool) {
                 let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt(format!(
                     "{}",
-                    "Couldn't find any files, that change the way firefox behaves, we searched 4 directories deep, to find something, here is what we found.\nPick your profile, to install into (navigate with arrow keys)".yellow()
+                    "Couldn't find any files, that change the way firefox behaves, we searched 7 directories deep, to find something, here is what we found.\nPick your profile, to install into (navigate with arrow keys)".yellow()
                 ))
                 .default(0)
                 .items(&options[..])
@@ -607,10 +611,6 @@ fn manual_profile_path() -> String {
 
 fn install(os: &str, matches: clap::ArgMatches) {
     println!("Performing first time setup and installing, configuring stuff, so that this application will work.");
-    //File::create(path).expect(&format!(
-    //    "{}",
-    //    "Failed to make \"once ran file\" in the config dir.".red()
-    //));
     if os == "linux" {
         firefox_dir(&matches);
     } else if os == "macos" {
@@ -645,12 +645,10 @@ fn install(os: &str, matches: clap::ArgMatches) {
     } else if os == "macos" {
         user = "/Users";
     }
-    //println!("{}", user);
     let output = str::from_utf8(&file.stdout).unwrap().replace(
         "$USER",
         &format!("{}/{}", user, &std::env::var("USER").unwrap()),
     );
-    //println!("{}", output);
     fs::File::create("themefox_manager.json")
         .expect(&format!(
             "{}",
@@ -838,14 +836,12 @@ fn ask_for_profile() {
     }
     let paths = fs::read_dir(".").unwrap();
     for path in paths {
-        //println!("{:?}", path);
         let tmp = path.unwrap();
         if tmp.path().is_dir() && !exceptions.contains(&tmp.file_name().to_str().unwrap()) {
             options.push(tmp.file_name().to_str().unwrap().to_string());
         }
     }
     options.sort();
-    //println!("{:?}", options);
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(format!(
             "{}",
