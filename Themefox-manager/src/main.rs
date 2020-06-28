@@ -17,7 +17,7 @@ fn main() {
       |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
      "#;
     // prints it
-    print!("{}\n", message);
+    print!("{}\n", message.bright_red());
     let app = App::new("themefox-manager")
         .name("themefox-manager")
         .version("v0.9.11")
@@ -78,10 +78,6 @@ fn main() {
             get_firefox_linux(false, matches, "null".to_string())
         } else if os == "macos" {
             firefox_dir(&matches);
-            //env::set_current_dir("firefox").expect(&format!(
-            //    "{}",
-            //    "failed to cd into the firefox dir in the firefox dir".red()
-            //));
             find_profile(false, matches.is_present("profile"));
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         } else if os == "windows" {
@@ -94,7 +90,6 @@ fn main() {
             fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
         }
     } else if matches.is_present("URL") {
-        //println!("{:?}", matches);
         let mut download_url = String::new();
 
         if !matches.is_present("git") {
@@ -108,9 +103,6 @@ fn main() {
                 the_argument.push("nothing");
                 the_argument.push(&arguments[arguments.len() - 1]);
             }
-            if the_argument[1].contains("\"") {
-                panic!("{}", "The program quitted itself, because the url contained a \". Now i know this might seem stupid, but believe me, it's for the better");
-            }
 
             if the_argument[1].starts_with("http")
                 && the_argument[1].contains("://")
@@ -120,7 +112,6 @@ fn main() {
             {
                 succes("Good url");
                 let id: Vec<&str> = the_argument[1].split('/').collect();
-                //println!("{:?}", id[id.len() - 2]);
 
                 let output_exit = Command::new("curl")
                     .arg(format!("127.0.0.1:1234/get/{}", id[id.len() - 2]))
@@ -142,7 +133,6 @@ fn main() {
                     );
                 }
                 succes("Good response from the server");
-                //println!("{}", downloads);
                 if downloads - 2 == 1 {
                     download_url = format!(
                         "http://beta.themefox.net/themes/{}/{}-{}.{}",
@@ -180,7 +170,6 @@ fn main() {
             }
         } else if matches.is_present("git") {
             let arguments: Vec<String> = env::args().collect();
-            //println!("{}", arguments[0]);
             let mut _the_argument: Vec<&str> = Vec::new();
             _the_argument = arguments[arguments.len() - 1].split(' ').collect();
             download_url = _the_argument[0].to_string();
@@ -216,7 +205,10 @@ fn main() {
         let os = std::env::consts::OS;
         install(os, matches);
     } else {
-        print!("Bad usage.\nHave a look at the usage with the `--help` flag. ");
+        print!(
+            "Bad usage.\nHave a look at the usage with the '{}' flag. ",
+            "--help".green()
+        );
     }
 }
 
@@ -313,7 +305,6 @@ fn download(file: &str, git: bool) {
                     "Failed to remove all files in the chrome dir".red()
                 ));
             }
-            //println!("Name: {:?}", path.unwrap());
         }
         download_git(file);
         // The program looks if two key files exist, in the download, if not it proceeds
@@ -330,20 +321,15 @@ fn download(file: &str, git: bool) {
             // for thing in this directory
             // zero loop
             for dir in paths {
-                //println!("Zero loop");
                 // sets name to the thing in the directry
                 let name = &dir.unwrap().path();
-                //println!("Found a dir: {:?}", &name);
                 // First loop
                 // Checks if name is a directory and if its not an exception like .git
                 if name.is_dir() && !tabu.contains(&name.file_name().unwrap().to_str().unwrap()) {
-                    //println!("{:?}", name);
                     // !after this point the recurive loops are running
                     // Checks the content of the dir in the current dir
                     for path in fs::read_dir(&name).unwrap() {
                         // !
-                        //println!("First loop");
-                        //println!("Found a dir: {:?}", &path);
                         let tmp = path.unwrap();
                         // Checks that its not a dir and if it already exists in the exceptions variable, so that only the right files can pass
                         if !tmp.path().is_dir()
@@ -369,11 +355,9 @@ fn download(file: &str, git: bool) {
                                     if !tmp2.path().is_dir()
                                         && exceptions.contains(&tmp2.file_name().to_str().unwrap())
                                     {
-                                        //println!("Test0");
                                         if !options.contains(&name.to_str().unwrap().to_string()) {
                                             options.push(name.to_str().unwrap().to_string());
                                         }
-                                    //println!("HEY");
                                     } else {
                                         // !
                                         let name = tmp2.path();
@@ -393,7 +377,6 @@ fn download(file: &str, git: bool) {
                                                             name.to_str().unwrap().to_string(),
                                                         );
                                                     }
-                                                //println!("HEY");
                                                 } else {
                                                     // !
                                                     let name = tmp3.path();
@@ -422,7 +405,6 @@ fn download(file: &str, git: bool) {
                                                                             .to_string(),
                                                                     );
                                                                 }
-                                                            //println!("HEY");
                                                             } else {
                                                                 // !
                                                                 let name = tmp4.path();
@@ -453,7 +435,6 @@ fn download(file: &str, git: bool) {
                                                                                         ),
                                                                                 );
                                                                             }
-                                                                        //println!("HEY");
                                                                         } else {
                                                                             // !
                                                                             let name = tmp5.path();
@@ -491,8 +472,6 @@ fn download(file: &str, git: bool) {
                                                                                         ),
                                                                                 );
                                                                             }
-                                                                        //println!("HEY");
-                                                                        } else {
                                                                         }
                                                                                 }
                                                                             }
@@ -510,13 +489,10 @@ fn download(file: &str, git: bool) {
                             }
                         }
                     }
-                } else {
-                    //println!("Its a file, so it isn't important.");
                 }
             }
 
             if options.len() > 0 {
-                //println!("{:?}", &options);
                 options.sort();
 
                 let selection = Select::with_theme(&ColorfulTheme::default())
@@ -530,11 +506,8 @@ fn download(file: &str, git: bool) {
                 .unwrap();
                 for file in fs::read_dir(Path::new(&options[selection])).unwrap() {
                     let tmp = &file.unwrap().path();
-                    //println!("{:?}", tmp);
 
                     syslinks(&tmp);
-
-                    //fs::link(tmp, tmp.file_name().unwrap()).expect("Failed to create systemlink");
                 }
             } else {
                 println!("{}", "Warning: The file doesn't have any files, that change the way firefox looks/behave. Unfortunately we couldn't find anything in the subdirectories".yellow())
@@ -712,9 +685,7 @@ fn install_helper(os: &str) {
         //.output()
         .status()
         .expect(&format!("{}", "Error: curl failed to spawn".red()));
-    //println!("{:?}", file.stdout);
-    //let output = file.stdout.as_slice();
-    //println!("{:?}", output);
+
     if os == "linux" || os == "macos" {
         Command::new("chmod")
             .arg("+x")
@@ -741,7 +712,6 @@ fn enable_css() {
         .expect(&format!("{}", "Failed to write to user.js file".red()));
         succes("Enabled stylesheets in your browsers settings");
     } else {
-        //println!("Beep");
         let mut file = File::open(file).expect(&"Failed to open user.js".red());
         let mut contents = String::new();
         file.read_to_string(&mut contents)
@@ -801,7 +771,6 @@ fn find_default_profile() {
         panic!("{}", "Quitting...".red());
     }
     succes("Found your default profile");
-    //println!("{}", contents);
     let v: Vec<&str> = contents
         .split(|c| c == '=' || c == ']' || c == '\n')
         .collect();
@@ -817,7 +786,6 @@ fn find_default_profile() {
     for el in &default_profile_path {
         new_path.push(el.trim_end());
     }
-    //println!("{:?}", new_path);
     env::set_current_dir(new_path).expect(&format!(
         "{}",
         "failed to cd. \nPlease report this issue on GitHub".red()
@@ -871,14 +839,10 @@ fn firefox_dir(matches: &clap::ArgMatches) {
         let snap = Path::new("snap/firefox/common/.mozilla/").exists();
         // checks If native is true, which is being set to true/false further up
         if native == true && !matches.is_present("path") {
-            // Prints the message
-            //println!("You have firefox installed via the native package manager");
-            // We already had a very simillar piece of code. Try to understand it yourself :)
             complete_path.push(".mozilla/");
 
         // Checks if the variable that determines if firefox was installed via snap is true
         } else if snap == true && !matches.is_present("path") {
-            //println!("You have firefox installed via the snap package manager");
             complete_path.push("snap/firefox/common/.mozilla/");
         } else {
             complete_path.push(manual_profile_path());
