@@ -12,7 +12,7 @@ fn main() {
     };
     if json_val["message"] == "ping" {
         // your code here
-        let response = "{{\"message\": \"pong\" }}";
+        let response = "{\"message\": \"pong\" }";
         std::fs::write("/home/legendofmiracles/foo.text", response);
         match lib::write_output(io::stdout(), response.to_string()) {
             Err(why) => panic!("{{\"error\": \"{}\"}}", why.to_string()),

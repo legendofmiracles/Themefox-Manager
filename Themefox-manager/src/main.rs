@@ -9,6 +9,7 @@ use std::{
 };
 use zip::ZipArchive;
 fn main() {
+    let os = std::env::consts::OS;
     // The ascii art message
     let message = r#"
     ______  __  __  ___  __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
@@ -18,10 +19,9 @@ fn main() {
      "#;
     // prints it
     print!("{}\n", message.bright_red());
-    let app = App::new("themefox-manager")
+    let mut app = App::new("themefox-manager")
         .name("themefox-manager")
         .version("v0.9.11")
-        //.set_term_width(if let Some((Width(w), _)) = terminal_size() { w as usize } else { 120 })
         .author("The authors name <lolsu@hash.fyi>")
         .about("Installs themes to your firefox, from a valid themefox url, or git url")
         .arg(
@@ -60,6 +60,29 @@ fn main() {
             .short("a")
             .help("This argument installs the files on client side, for the browser addon to work.")
         );
+    if os == "linux" {
+        let mut shell_path = PathBuf::new();
+        let extension = ".fish";
+        shell_path.push(dirs::config_dir().unwrap());
+        shell_path.push("fish/completions");
+        fs::create_dir_all(&shell_path).expect(&format!(
+            "{}",
+            "Failed to create the fish autocomplete dir".red()
+        ));
+        shell_path.push(format!("themefox-manager{}", extension));
+
+        let mut completion = File::create(shell_path)
+            .expect(&format!("{}", "Failed to make shell completion".red()));
+
+        app.gen_completions_to("themefox-manager", clap::Shell::Fish, &mut completion);
+    } else if os == "windows" {
+        app.gen_completions_to(
+            "themefox-manager",
+            clap::Shell::PowerShell,
+            &mut io::stdout(),
+        );
+    }
+
     let matches = app.get_matches();
     if matches.is_present("reset") {
         if Confirm::new()
@@ -72,10 +95,10 @@ fn main() {
             println!("Ok, looks like you changed your mind");
             panic!("{}", "Quitting...".red());
         }
-        let os = std::env::consts::OS;
+        // i know we already fetched it way earlier, but the user doesn't know that :)
         succes("Fetched your operating system");
         if os == "linux" {
-            get_firefox_linux(false, matches, "null".to_string())
+            get_firefox_linux(true, matches, "null".to_string())
         } else if os == "macos" {
             firefox_dir(&matches);
             find_profile(false, matches.is_present("profile"));
@@ -176,17 +199,13 @@ fn main() {
         }
 
         // fetches what operating system you use
-        let os = std::env::consts::OS;
+        //let os = std::env::consts::OS;
         succes("Fetched your operating system");
         // If the operating system is linux then it does everything that is in those brackets
         if os == "linux" {
             get_firefox_linux(true, matches, download_url);
         } else if os == "macos" {
             firefox_dir(&matches);
-            //env::set_current_dir("firefox").expect(&format!(
-            //    "{}",
-            //    "failed to cd into the firefox dir in the firefox dir".red()
-            //));
             find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else if os == "windows" {
@@ -226,7 +245,7 @@ fn find_profile(go_chrome: bool, find_profile: bool) {
             fs::create_dir("chrome").expect("Error: failed to mkdir");
             println!("Created the chrome directory, because it didn't exist before");
         } else {
-            println!("You chrome directory doesn't exist, so we can't remove it -.-");
+            println!("Your chrome directory doesn't exist, so we can't remove it -.-");
             panic!("{}", "Quitting...".red())
         }
     }
@@ -290,6 +309,10 @@ fn download(file: &str, git: bool) {
         ));
         succes("Finished installing the theme: enjoy!");
     } else {
+        // ptr = path to repo
+        // download git only suceeds if there are no errors, so we can be positive that the ptr has the files we need.
+        let ptr = download_git(file);
+        // Then we remove everything in the current dir
         let paths = fs::read_dir(".").unwrap();
 
         for path in paths {
@@ -306,7 +329,8 @@ fn download(file: &str, git: bool) {
                 ));
             }
         }
-        download_git(file);
+        recursive(&PathBuf::from(ptr)).expect("TEST");
+
         // The program looks if two key files exist, in the download, if not it proceeds
         if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
             let exceptions = [
@@ -516,17 +540,59 @@ fn download(file: &str, git: bool) {
     }
 }
 
+fn recursive(dir: &PathBuf) -> io::Result<()> {
+    //println!("{:?}", dir);
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let foobar = entry.path();
+        let mut path = PathBuf::new();
+        // Set this to i8, since we don't need a high number. something is definitly wrong, and it will panic
+        let mut run: i8 = 0;
+        for i in foobar.components() {
+            run += 1;
+            if run > 3 {
+                println!("{:?} parents {}", i, run);
+                path.push(i);
+            }
+        }
+        //println!("{:?}", path);
+        let name = path.file_name().unwrap();
+        if foobar.is_dir() {
+            fs::create_dir(name).expect(&format!(
+                "{}{:?}",
+                "Failed to copy contents from tmp dir".red(),
+                name
+            ));
+            recursive(&path)?;
+        } else {
+            let mut file = File::create(path.file_name().unwrap())
+                .expect(&format!("{}", "Failed to copy contents from tmp dir".red()));
+            //fs::copy(&path, name).expect(&format!("{}", "Failed to copy contents from tmp dir".red()));;
+            io::copy(
+                &mut File::open(path)
+                    .expect(&format!("{}", "Failed to copy contents from tmp dir".red())),
+                &mut file,
+            )
+            .expect(&format!("{}", "Failed to copy contents from tmp dir".red()));
+        }
+    }
+
+    Ok(())
+}
+
 #[cfg(target_os = "linux")]
-fn download_git(file: &str) {
+fn download_git(file: &str) -> &str {
+    fs::create_dir_all("/tmp/chrome").expect(&format!("{}", "Failed to create the tmmp dir".red()));
     Command::new("git")
         .arg("clone")
         .arg(file)
-        .arg(".")
+        .arg("/tmp/chrome/")
         .status()
         .expect(&format!(
             "{}",
-            "Error: git failed to start. Do you have it installed?".red()
+            "Error: git failed to complete. Do you have it installed?".red()
         ));
+    return "/tmp/chrome/";
 }
 
 #[cfg(target_os = "windows")]
