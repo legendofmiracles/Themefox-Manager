@@ -106,7 +106,7 @@ This branch is development, so it will be buggy.
 
   If you experience any issues (i hope not), please leave a issue, on the issues tab, on the top of the page.
   
-  For windows issues, you should definitly take a look at (this)[https://wiki.archlinux.org/index.php/Installation_guide].
+  For windows issues, you should definitly take a look at [this](https://wiki.archlinux.org/index.php/Installation_guide)﻿.
 
   
 
