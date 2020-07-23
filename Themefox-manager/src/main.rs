@@ -1,3 +1,4 @@
+// People called this code as bad as Yandere devs, so don't look at it.
 use clap::{App, Arg};
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
@@ -8,17 +9,11 @@ use std::{
     process::Command, str,
 };
 use zip::ZipArchive;
+
+static mut SILENT: bool = false;
 fn main() {
     let os = std::env::consts::OS;
     // The ascii art message
-    let message = r#"
-    ______  __  __  ___  __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
-    |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
-      | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
-      |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
-     "#;
-    // prints it
-    print!("{}\n", message.bright_red());
     let mut app = App::new("themefox-manager")
         .name("themefox-manager")
         .version("v0.9.11")
@@ -45,7 +40,7 @@ fn main() {
             Arg::with_name("git")
             .long("git")
             .short("g")
-            .help("Installs from git repo, must be specified in a full URL. For example: https://githost.domain/foo/bar.git. Will remove all other files in the dir")
+            .help("Installs from git repo, must be specified in a full URL. For example: https://githost.domain/foo/bar.git.")
             //.long("Installs from git repo, must be specified in a full URL. . Will remove all other files in the dir")
         )
         .arg(
@@ -59,8 +54,36 @@ fn main() {
             .long("addon")
             .short("a")
             .help("This argument installs the files on client side, for the browser addon to work.")
-        );
-    if os == "linux" {
+        )
+        //.arg(
+        //    Arg::with_name("verbose")
+        //        .long("verbose")
+        //        .short("v")
+        //        .help("prints more information to the screen")
+        //)
+        .arg(
+            Arg::with_name("silent")
+                .long("silent")
+                .short("s")
+                .help("prints less info to the screen")
+            );
+    let matches = app.get_matches();
+    if !matches.is_present("silent") {
+        let message = r#"
+    ______  __  __  ___  __   __  ___   ___    __   ___  __       __  _    __    __  _    __     __   ___   ___
+    |_   _| | || | | __| |  V  | | __| | __|  /__\  \ \_/ /  __  |  V  |  /  \  |  \| |  /  \   / _| | __| | _ \ 
+      | |   | >< | | _|  | \_/ | | _|  | _|  | \/ |  > , <  |__| | \_/ | | /\ | | | ' | | /\ | | |/\ | _|  | v / 
+      |_|   |_||_| |___| |_| |_| |___| |_|    \__/  /_/ \_\      |_| |_| |_||_| |_|\__| |_||_|  \__/ |___| |_|_\ 
+     "#;
+        // prints it
+        print!("{}\n", message.bright_red());
+    } else {
+        unsafe {
+            SILENT = true;
+        }
+    }
+    /*
+        if os == "linux" {
         let mut shell_path = PathBuf::new();
         let extension = ".fish";
         shell_path.push(dirs::config_dir().unwrap());
@@ -81,9 +104,8 @@ fn main() {
             clap::Shell::PowerShell,
             &mut io::stdout(),
         );
-    }
+    }*/
 
-    let matches = app.get_matches();
     if matches.is_present("reset") {
         if Confirm::new()
             .with_prompt("Do you want to continue, and delete all chrome files?")
@@ -119,7 +141,7 @@ fn main() {
             //let mut output = "";
             let arguments: Vec<String> = env::args().collect();
             let mut the_argument: Vec<&str> = Vec::new();
-            println!("{}", arguments[arguments.len() - 1]);
+            //println!("{}", arguments[arguments.len() - 1]);
             if arguments[arguments.len() - 1].starts_with("themefox-manager:// ") {
                 the_argument = arguments[arguments.len() - 1].split(' ').collect();
             } else {
@@ -203,7 +225,7 @@ fn main() {
         succes("Fetched your operating system");
         // If the operating system is linux then it does everything that is in those brackets
         if os == "linux" {
-            get_firefox_linux(true, matches, download_url);
+            get_firefox_linux(false, matches, download_url);
         } else if os == "macos" {
             firefox_dir(&matches);
             find_profile(true, matches.is_present("profile"));
@@ -217,7 +239,7 @@ fn main() {
             find_profile(true, matches.is_present("profile"));
             download(&download_url, matches.is_present("git"));
         } else {
-            eprintln!("Error: You seem to use a Operating System that is not supported. Please report this issue on github (https://github.com/alx365/Themefox-Manager)");
+            eprintln!("Error: You seem to use a Operating System that is not supported. If you want support for it, consider leaving a issue on the github page.");
             panic!("{}", "Quitting...".red());
         }
     } else if matches.is_present("addon") {
@@ -243,7 +265,11 @@ fn find_profile(go_chrome: bool, find_profile: bool) {
     if Path::new("chrome").exists() == false {
         if go_chrome == true {
             fs::create_dir("chrome").expect("Error: failed to mkdir");
-            println!("Created the chrome directory, because it didn't exist before");
+            unsafe {
+                if !SILENT {
+                    println!("Created the chrome directory, because it didn't exist before");
+                }
+            }
         } else {
             println!("Your chrome directory doesn't exist, so we can't remove it -.-");
             panic!("{}", "Quitting...".red())
@@ -329,8 +355,10 @@ fn download(file: &str, git: bool) {
                 ));
             }
         }
-        recursive(&PathBuf::from(ptr)).expect("TEST");
-
+        copy(ptr, env::current_dir().unwrap()).expect(&format!(
+            "failed to copy from the tmp dir to the chrome dir"
+        ));
+        fs::remove_dir_all(ptr).expect(&format!("{}", "Failed to remove the tempoary directory".red()));
         // The program looks if two key files exist, in the download, if not it proceeds
         if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
             let exceptions = [
@@ -540,40 +568,47 @@ fn download(file: &str, git: bool) {
     }
 }
 
-fn recursive(dir: &PathBuf) -> io::Result<()> {
-    //println!("{:?}", dir);
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let foobar = entry.path();
-        let mut path = PathBuf::new();
-        // Set this to i8, since we don't need a high number. something is definitly wrong, and it will panic
-        let mut run: i8 = 0;
-        for i in foobar.components() {
-            run += 1;
-            if run > 3 {
-                println!("{:?} parents {}", i, run);
-                path.push(i);
-            }
-        }
-        //println!("{:?}", path);
-        let name = path.file_name().unwrap();
-        if foobar.is_dir() {
-            fs::create_dir(name).expect(&format!(
-                "{}{:?}",
-                "Failed to copy contents from tmp dir".red(),
-                name
-            ));
-            recursive(&path)?;
+pub fn copy<U: AsRef<Path>, V: AsRef<Path>>(from: U, to: V) -> Result<(), std::io::Error> {
+    let mut stack = Vec::new();
+    stack.push(PathBuf::from(from.as_ref()));
+
+    let output_root = PathBuf::from(to.as_ref());
+    let input_root = PathBuf::from(from.as_ref()).components().count();
+
+    while let Some(working_path) = stack.pop() {
+       // println!("process: {:?}", &working_path);
+
+        // Generate a relative path
+        let src: PathBuf = working_path.components().skip(input_root).collect();
+
+        // Create a destination if missing
+        let dest = if src.components().count() == 0 {
+            output_root.clone()
         } else {
-            let mut file = File::create(path.file_name().unwrap())
-                .expect(&format!("{}", "Failed to copy contents from tmp dir".red()));
-            //fs::copy(&path, name).expect(&format!("{}", "Failed to copy contents from tmp dir".red()));;
-            io::copy(
-                &mut File::open(path)
-                    .expect(&format!("{}", "Failed to copy contents from tmp dir".red())),
-                &mut file,
-            )
-            .expect(&format!("{}", "Failed to copy contents from tmp dir".red()));
+            output_root.join(&src)
+        };
+        if fs::metadata(&dest).is_err() {
+            //println!(" mkdir: {:?}", dest);
+            fs::create_dir_all(&dest)?;
+        }
+
+        for entry in fs::read_dir(working_path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+            } else {
+                match path.file_name() {
+                    Some(filename) => {
+                        let dest_path = dest.join(filename);
+                        //println!("  copy: {:?} -> {:?}", &path, &dest_path);
+                        fs::copy(&path, &dest_path)?;
+                    }
+                    None => {
+                        println!("failed: {:?}", path);
+                    }
+                }
+            }
         }
     }
 
@@ -582,8 +617,8 @@ fn recursive(dir: &PathBuf) -> io::Result<()> {
 
 #[cfg(target_os = "linux")]
 fn download_git(file: &str) -> &str {
-    fs::create_dir_all("/tmp/chrome").expect(&format!("{}", "Failed to create the tmmp dir".red()));
-    Command::new("git")
+    fs::create_dir_all("/tmp/chrome").expect(&format!("{}", "Failed to create the tmp dir".red()));
+    let git = Command::new("git")
         .arg("clone")
         .arg(file)
         .arg("/tmp/chrome/")
@@ -592,6 +627,14 @@ fn download_git(file: &str) -> &str {
             "{}",
             "Error: git failed to complete. Do you have it installed?".red()
         ));
+    match git.code() {
+        Some(code) => {
+            if code > 0 {
+                panic!("{}", "failed to clone git repo".red())
+            }
+        }
+        None => panic!("Process terminated by signal".red()),
+    }
     return "/tmp/chrome/";
 }
 
@@ -600,7 +643,7 @@ fn download_git(file: &str) {
     use git2::Repository;
     let _repo = match Repository::clone(file, ".") {
         Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}", e),
+        Err(e) => panic!("failed to clone: {}".red(), e),
     };
 }
 
@@ -609,7 +652,7 @@ fn download_git(file: &str) {
     use git2::Repository;
     let _repo = match Repository::clone(file, ".") {
         Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}", e),
+        Err(e) => panic!("failed to clone: {}".red(), e),
     };
 }
 
@@ -621,10 +664,10 @@ fn syslinks(tmp: &std::path::PathBuf) {
 fn syslinks(tmp: &std::path::PathBuf) {
     if tmp.is_dir() {
         std::os::windows::fs::symlink_dir(tmp, tmp.file_name().unwrap())
-            .expect("Failed to create syslinks");
+            .expect(&format!("{}", "Failed to create syslinks".red()));
 
         std::os::windows::fs::symlink_file(tmp, tmp.file_name().unwrap())
-            .expect("Failed to create syslinks");
+            .expect(&format!("{}", "Failed to create syslinks".red()));
     }
 }
 fn manual_profile_path() -> String {
@@ -762,7 +805,11 @@ fn install_helper(os: &str) {
 }
 
 fn succes(msg: &str) {
-    println!("{}", format!("✔  {}", &msg).green());
+    unsafe {
+        if !SILENT {
+            println!("{}", format!("✔  {}", &msg).green());
+        }
+    }
 }
 
 fn enable_css() {
@@ -810,9 +857,9 @@ fn get_firefox_linux(reset: bool, matches: clap::ArgMatches, download_url: Strin
     env::set_current_dir("firefox")
         .expect(&format!("{}", "failed to cd into the firefox dir".red()));
 
-    find_profile(reset, matches.is_present("profile"));
+    find_profile(!reset, matches.is_present("profile"));
 
-    if reset {
+    if !reset {
         download(&download_url, matches.is_present("git"));
     } else {
         fs::remove_dir_all("chrome").expect(&format!("{}", "Error: failed to rmdir".red()));
