@@ -338,7 +338,6 @@ fn download(file: &str, git: bool) {
         // ptr = path to repo
         // download git only suceeds if there are no errors, so we can be positive that the ptr has the files we need.
         let ptr = download_git(file);
-        println!("{}", ptr);
         // Then we remove everything in the current dir
         let paths = fs::read_dir(".").unwrap();
 
@@ -356,16 +355,11 @@ fn download(file: &str, git: bool) {
                 ));
             }
         }
-        copy(&ptr, env::current_dir().unwrap()).expect(&format!(
-            "{}",
-            "failed to copy from the tmp dir to the chrome dir".red()
-        ));
-        fs::remove_dir_all(ptr).expect(&format!(
-            "{}",
-            "Failed to remove the tempoary directory".red()
-        ));
+        println!("{}", &format!("{}/userChrome.css", ptr));
         // The program looks if two key files exist, in the download, if not it proceeds
-        if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
+        if !Path::new(&format!("{}/userChrome.css", ptr)).exists()
+            || !Path::new(&format!("{}/userContent.css", ptr)).exists()
+        {
             let exceptions = [
                 "userContent.css",
                 "userChrome.css",
@@ -548,7 +542,15 @@ fn download(file: &str, git: bool) {
                     }
                 }
             }
-
+            copy(&ptr, env::current_dir().unwrap()).expect(&format!(
+                "{}",
+                "failed to copy from the tmp dir to the chrome dir".red()
+            ));
+            fs::remove_dir_all(ptr).expect(&format!(
+                "{}",
+                "Failed to remove the tempoary directory".red()
+            ));
+            println!("{:?}", options);
             if options.len() > 0 {
                 options.sort();
 
