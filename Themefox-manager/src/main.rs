@@ -338,6 +338,7 @@ fn download(file: &str, git: bool) {
         // ptr = path to repo
         // download git only suceeds if there are no errors, so we can be positive that the ptr has the files we need.
         let ptr = download_git(file);
+        println!("{}", ptr);
         // Then we remove everything in the current dir
         let paths = fs::read_dir(".").unwrap();
 
@@ -355,10 +356,14 @@ fn download(file: &str, git: bool) {
                 ));
             }
         }
-        copy(ptr, env::current_dir().unwrap()).expect(&format!(
-            "failed to copy from the tmp dir to the chrome dir"
+        copy(&ptr, env::current_dir().unwrap()).expect(&format!(
+            "{}",
+            "failed to copy from the tmp dir to the chrome dir".red()
         ));
-        fs::remove_dir_all(ptr).expect(&format!("{}", "Failed to remove the tempoary directory".red()));
+        fs::remove_dir_all(ptr).expect(&format!(
+            "{}",
+            "Failed to remove the tempoary directory".red()
+        ));
         // The program looks if two key files exist, in the download, if not it proceeds
         if !Path::new("userChrome.css").exists() || !Path::new("userContent.css").exists() {
             let exceptions = [
@@ -576,7 +581,7 @@ pub fn copy<U: AsRef<Path>, V: AsRef<Path>>(from: U, to: V) -> Result<(), std::i
     let input_root = PathBuf::from(from.as_ref()).components().count();
 
     while let Some(working_path) = stack.pop() {
-       // println!("process: {:?}", &working_path);
+        // println!("process: {:?}", &working_path);
 
         // Generate a relative path
         let src: PathBuf = working_path.components().skip(input_root).collect();
@@ -615,13 +620,13 @@ pub fn copy<U: AsRef<Path>, V: AsRef<Path>>(from: U, to: V) -> Result<(), std::i
     Ok(())
 }
 
-#[cfg(target_os = "linux")]
-fn download_git(file: &str) -> &str {
-    fs::create_dir_all("/tmp/chrome").expect(&format!("{}", "Failed to create the tmp dir".red()));
+fn download_git(file: &str) -> String {
+    let temp = get_tmp_dir();
+    fs::create_dir_all(&temp).expect(&format!("{}", "Failed to create the tmp dir".red()));
     let git = Command::new("git")
         .arg("clone")
         .arg(file)
-        .arg("/tmp/chrome/")
+        .arg(format!("{}/chrome/", temp.to_str().unwrap()))
         .status()
         .expect(&format!(
             "{}",
@@ -635,26 +640,35 @@ fn download_git(file: &str) -> &str {
         }
         None => panic!("Process terminated by signal".red()),
     }
-    return "/tmp/chrome/";
+    return temp.to_str().unwrap().to_string();
 }
+fn get_tmp_dir() -> PathBuf {
+    if env::consts::OS == "windows" {
+        let mut temp = dirs::home_dir().unwrap();
+        temp.push("AppData/Local/Temp/firefox-css");
+        println!("{:?}", temp);
+        return temp;
+    } else {
+        return PathBuf::from("/tmp/firefox-css");
+    }
+}
+// #[cfg(target_os = "windows")]
+// fn download_git(file: &str) {
+//     use git2::Repository;
+//     let _repo = match Repository::clone(file, ".") {
+//         Ok(repo) => repo,
+//         Err(e) => panic!("failed to clone: {}".red(), e),
+//     };
+// }
 
-#[cfg(target_os = "windows")]
-fn download_git(file: &str) {
-    use git2::Repository;
-    let _repo = match Repository::clone(file, ".") {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}".red(), e),
-    };
-}
-
-#[cfg(target_os = "macos")]
-fn download_git(file: &str) {
-    use git2::Repository;
-    let _repo = match Repository::clone(file, ".") {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}".red(), e),
-    };
-}
+// #[cfg(target_os = "macos")]
+// fn download_git(file: &str) {
+//     use git2::Repository;
+//     let _repo = match Repository::clone(file, ".") {
+//         Ok(repo) => repo,
+//         Err(e) => panic!("failed to clone: {}".red(), e),
+//     };
+// }
 
 #[cfg(unix)]
 fn syslinks(tmp: &std::path::PathBuf) {
