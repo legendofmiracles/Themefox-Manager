@@ -89,7 +89,7 @@ Please leave a pull request / open a issue , if you want to have new features ad
 
 
 
-## Compiling from Source (Not recommended, only to this if you have another architecture)
+## Compiling from Source (Not recommended, only do this if you have another architecture)
 This branch is development, so it will be buggy.
 
   1. Install rust (best with rustup, see https://www.rust-lang.org/learn/get-started), and cargo (comes installed with rustup)
